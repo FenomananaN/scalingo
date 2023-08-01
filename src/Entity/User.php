@@ -76,6 +76,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: OldPhoneNumber::class)]
     private Collection $oldPhoneNumbers;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: CashOutRP::class)]
+    private Collection $cashOutRPs;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $CurrentRP = null;
+
     public function __construct()
     {
         $this->depot = new ArrayCollection();
@@ -83,6 +89,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->retraits = new ArrayCollection();
         $this->transactions = new ArrayCollection();
         $this->oldPhoneNumbers = new ArrayCollection();
+        $this->cashOutRPs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -446,6 +453,48 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $oldPhoneNumber->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CashOutRP>
+     */
+    public function getCashOutRPs(): Collection
+    {
+        return $this->cashOutRPs;
+    }
+
+    public function addCashOutRP(CashOutRP $cashOutRP): self
+    {
+        if (!$this->cashOutRPs->contains($cashOutRP)) {
+            $this->cashOutRPs->add($cashOutRP);
+            $cashOutRP->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCashOutRP(CashOutRP $cashOutRP): self
+    {
+        if ($this->cashOutRPs->removeElement($cashOutRP)) {
+            // set the owning side to null (unless already changed)
+            if ($cashOutRP->getUser() === $this) {
+                $cashOutRP->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCurrentRP(): ?string
+    {
+        return $this->CurrentRP;
+    }
+
+    public function setCurrentRP(?string $CurrentRP): self
+    {
+        $this->CurrentRP = $CurrentRP;
 
         return $this;
     }

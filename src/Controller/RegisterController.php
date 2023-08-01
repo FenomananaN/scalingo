@@ -10,6 +10,7 @@ use App\Entity\AffiliatedLevel;
 use App\Entity\UserVerifiedInfo;
 use App\Repository\UserRepository;
 use App\Repository\AffiliatedRepository;
+use App\Repository\RPManagerRepository;
 use App\Service\CheckMultiple;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,14 +26,16 @@ class RegisterController extends AbstractController
     private $affiliatedRepository;
     private $randomMVXId;
     private $checkMultiple;
+    private $rpManagerRepository;
 
-    public function __construct(EntityManagerInterface $em, UserRepository $userRepository, AffiliatedRepository $affiliatedRepository, RandomMVXId $randomMVXId, CheckMultiple $checkMultiple)
+    public function __construct(EntityManagerInterface $em, UserRepository $userRepository, AffiliatedRepository $affiliatedRepository, RandomMVXId $randomMVXId, CheckMultiple $checkMultiple, RPManagerRepository $rpManagerRepository)
     {
         $this->em = $em;
         $this->affiliatedRepository = $affiliatedRepository;
         $this->userRepository = $userRepository;
         $this->randomMVXId = $randomMVXId;
         $this->checkMultiple = $checkMultiple;
+        $this->rpManagerRepository=$rpManagerRepository;
     }
     //, description: 'register a new user', tags: 'Register'
     #[Route('/register', name: 'app_register', methods: 'POST')]
@@ -134,8 +137,12 @@ class RegisterController extends AbstractController
         $user->setVerifiedStatus(false);
         $user->setVerificationFailed(false);
         $user->setCreatedAt(new \DateTime());
-        //dd($user);
-        //tapitra
+
+        //set initial value to RP
+        $rp=$this->rpManagerRepository->findOneById(1);
+        $user->setCurrentRP($rp->getRPInitial());
+        //
+        //
 
         //creating parrainage for user
         //  $user=$this->userRepository->findOneByEmail('fenomanana.nomenjanahary@gmail.com');

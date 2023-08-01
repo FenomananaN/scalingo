@@ -64,6 +64,9 @@ class Transaction
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $transactionId = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $RPObtenu = null;
+
 
     public function getId(): ?int
     {
@@ -258,6 +261,18 @@ class Transaction
     public function setFailed(?bool $failed): self
     {
         $this->failed = $failed;
+
+        return $this;
+    }
+
+    public function getRPObtenu(): ?string
+    {
+        return $this->RPObtenu;
+    }
+
+    public function setRPObtenu(?string $RPObtenu): self
+    {
+        $this->RPObtenu = $RPObtenu;
 
         return $this;
     }

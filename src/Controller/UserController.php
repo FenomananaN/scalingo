@@ -63,7 +63,7 @@ class UserController extends AbstractController
     public function getCurrentuser(): JsonResponse
     {
         $user = $this->getUser();
-
+        
         /*if (!$user) {
             return $this->json(['message' => 'not connected'], 401);
         }*/
@@ -81,10 +81,38 @@ class UserController extends AbstractController
             'airtel' => $user->getAirtel(),
             'createdAt' => $user->getCreatedAt(),
             'isVerified' => $user->isVerifiedStatus(),
+            'currentRP' => $user->getCurrentRP(),
             'parrainageId' => $user->getAffiliated()->getParrainageId(),
             'roles' => $user->getRoles()
         ]);
     }
+
+    #[Route('/api/userdetailled', name: 'app_dashboard', methods:'GET')]
+    public function getDashboard(): JsonResponse
+    {
+
+        //misi erreur ni vs code
+        $user = $this->getUser();
+        $affiliated=$this->affiliatedRepository->findOneByUser($user);
+
+        return $this->json([
+            'id' => $user->getId(),
+          //  'email' => $user->getEmail(),
+           // 'username' => $user->getUsername(),
+           // 'fullname' => $user->getFullname(),
+            'telma' => $user->getTelma(),
+            'orange' => $user->getOrange(),
+            'airtel' => $user->getAirtel(),
+            'createdAt' => $user->getCreatedAt(), 
+            'currentRP' => $user->getCurrentRP(),
+           //'fidelityPt' => $user->getFidelityPt(),
+            'isVerified' => $user->isVerifiedStatus(),
+            'isVerificationPending'=>$user->isVerificationPending(),
+            'parrainageId' => $affiliated->getParrainageId(),
+            'mvx'=>$affiliated->getMvx()
+        ]);
+    }
+
 
     #[Route('/api/edituser', name: 'app_edit_user', methods:'POST')]
     public function editCurrentUser(Request $request): JsonResponse
@@ -180,31 +208,7 @@ class UserController extends AbstractController
         return $this->json(['hgh']);
     }*/
 
-    #[Route('/api/dashboard', name: 'app_dashboard', methods:'GET')]
-    public function getDashboard(): JsonResponse
-    {
-
-        //misi erreur ni vs code
-        $user = $this->getUser();
-        $affiliated=$this->affiliatedRepository->findOneByUser($user);
-
-        return $this->json([
-           // 'id' => $user->getId(),
-          //  'email' => $user->getEmail(),
-           // 'username' => $user->getUsername(),
-           // 'fullname' => $user->getFullname(),
-          //  'telma' => $user->getTelma(),
-          //  'orange' => $user->getOrange(),
-           // 'airtel' => $user->getAirtel(),
-           // 'createdAt' => $user->getCreatedAt(),
-           'fidelityPt' => $user->getFidelityPt(),
-            'isVerified' => $user->isVerifiedStatus(),
-            'isVerificationPending'=>$user->isVerificationPending(),
-            'parrainageId' => $affiliated->getParrainageId(),
-            'mvx'=>$affiliated->getMvx()
-        ]);
-    }
-
+    
     #[Route('/api/setting', name: 'app_setting', methods:'GET')]
     public function getSetting(): JsonResponse
     {

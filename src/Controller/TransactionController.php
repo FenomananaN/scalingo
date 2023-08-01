@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use Exception;
+use App\Service\RPUtils;
 use App\Entity\Transaction;
 use App\Service\RandomMVXId;
 use App\Repository\UserRepository;
@@ -10,7 +12,6 @@ use App\Repository\GasyWalletRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\TransactionRepository;
 use App\Repository\GlobalWalletRepository;
-use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -23,8 +24,9 @@ class TransactionController extends AbstractController
     private $gasyWalletRepository;
     private $transactionRepository;
     private $randomMVXId;
+    private $rPUtils;
 
-    public function __construct(EntityManagerInterface $em, GlobalWalletRepository $globalWalletRepository, WalletRepository $walletRepository, UserRepository $userRepository, GasyWalletRepository $gasyWalletRepository,TransactionRepository $transactionRepository, RandomMVXId $randomMVXId)
+    public function __construct(EntityManagerInterface $em, GlobalWalletRepository $globalWalletRepository, WalletRepository $walletRepository, UserRepository $userRepository, GasyWalletRepository $gasyWalletRepository,TransactionRepository $transactionRepository, RandomMVXId $randomMVXId, RPUtils $rPUtils)
     {
         $this->em = $em;
         $this->globalWalletRepository = $globalWalletRepository;
@@ -32,6 +34,7 @@ class TransactionController extends AbstractController
         $this->gasyWalletRepository = $gasyWalletRepository;
         $this->transactionRepository = $transactionRepository;
         $this->randomMVXId = $randomMVXId;
+        $this->rPUtils=$rPUtils;
     }
 //depot    
     #[Route('/depot', name: 'app_depot', methods: 'POST')]
@@ -67,6 +70,14 @@ class TransactionController extends AbstractController
         $depot->setTransactionDone(false);
         $depot->setVerified(false);
 
+        //add RP
+        $rp=$this->rPUtils->RPO($depot->getSoldeAriary());
+        $depot->setRPObtenu($rp);
+
+        //new CurrentRP
+        $user->setCurrentRP($user->getCurrentRP()+$rp);
+        
+
         //creating the generated parrainageId
         $_referenceManavola = $this->transactionRepository->findAllReferenceManavola();
         $referenceManavola = array();
@@ -82,6 +93,7 @@ class TransactionController extends AbstractController
         $this->em->getConnection()->beginTransaction();
         try {
             $this->em->persist($depot);
+            $this->em->persist($user);
             $this->em->flush();
             $this->em->commit();
         } catch (\Exception $e) {
@@ -178,6 +190,13 @@ class TransactionController extends AbstractController
         $retrait->setBeingProcessed(false);
         $retrait->setTransactionDone(false);
 
+        ////add RP
+        $rp=$this->rPUtils->RPO($retrait->getSoldeAriary());
+        $retrait->setRPObtenu($rp);
+
+        //new CurrentRP
+        $user->setCurrentRP($user->getCurrentRP()+$rp);
+
         //creating the generated parrainageId
         $_referenceManavola = $this->transactionRepository->findAllReferenceManavola();
         $referenceManavola = array();
@@ -190,6 +209,7 @@ class TransactionController extends AbstractController
         $this->em->getConnection()->beginTransaction();
         try {
             $this->em->persist($retrait);
+            $this->em->persist($user);
             $this->em->flush();
             $this->em->commit();
         } catch (\Exception $e) {
