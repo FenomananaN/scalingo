@@ -21,24 +21,6 @@ class OldPhoneNumberRepository extends ServiceEntityRepository
         parent::__construct($registry, OldPhoneNumber::class);
     }
 
-    public function save(OldPhoneNumber $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->persist($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
-    public function remove(OldPhoneNumber $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->remove($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
 //    /**
 //     * @return OldPhoneNumber[] Returns an array of OldPhoneNumber objects
 //     */

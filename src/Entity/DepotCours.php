@@ -13,9 +13,9 @@ class DepotCours
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(inversedBy: 'depotCours', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Wallet $Wallet = null;
+    private ?Wallet $wallet = null;
 
     #[ORM\Column]
     private ?int $coursMax = null;
@@ -24,7 +24,7 @@ class DepotCours
     private ?int $coursMin = null;
 
     #[ORM\Column]
-    private ?int $MontantMRMax = null;
+    private ?int $montantMRMax = null;
 
     public function getId(): ?int
     {
@@ -33,12 +33,12 @@ class DepotCours
 
     public function getWallet(): ?Wallet
     {
-        return $this->Wallet;
+        return $this->wallet;
     }
 
-    public function setWallet(Wallet $Wallet): self
+    public function setWallet(Wallet $wallet): static
     {
-        $this->Wallet = $Wallet;
+        $this->wallet = $wallet;
 
         return $this;
     }
@@ -48,7 +48,7 @@ class DepotCours
         return $this->coursMax;
     }
 
-    public function setCoursMax(int $coursMax): self
+    public function setCoursMax(int $coursMax): static
     {
         $this->coursMax = $coursMax;
 
@@ -60,7 +60,7 @@ class DepotCours
         return $this->coursMin;
     }
 
-    public function setCoursMin(int $coursMin): self
+    public function setCoursMin(int $coursMin): static
     {
         $this->coursMin = $coursMin;
 
@@ -69,12 +69,12 @@ class DepotCours
 
     public function getMontantMRMax(): ?int
     {
-        return $this->MontantMRMax;
+        return $this->montantMRMax;
     }
 
-    public function setMontantMRMax(int $MontantMRMax): self
+    public function setMontantMRMax(int $montantMRMax): static
     {
-        $this->MontantMRMax = $MontantMRMax;
+        $this->montantMRMax = $montantMRMax;
 
         return $this;
     }

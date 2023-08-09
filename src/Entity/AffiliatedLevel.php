@@ -19,7 +19,7 @@ class AffiliatedLevel
 
     #[ORM\ManyToOne(inversedBy: 'affiliatedLevels')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $user = null;
+    private ?User $users = null;
 
     public function getId(): ?int
     {
@@ -31,21 +31,21 @@ class AffiliatedLevel
         return $this->affiliated;
     }
 
-    public function setAffiliated(?Affiliated $affiliated): self
+    public function setAffiliated(?Affiliated $affiliated): static
     {
         $this->affiliated = $affiliated;
 
         return $this;
     }
 
-    public function getUser(): ?User
+    public function getUsers(): ?User
     {
-        return $this->user;
+        return $this->users;
     }
 
-    public function setUser(?User $user): self
+    public function setUsers(?User $users): static
     {
-        $this->user = $user;
+        $this->users = $users;
 
         return $this;
     }

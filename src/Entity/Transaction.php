@@ -18,14 +18,13 @@ class Transaction
     private ?string $transactionType = null;
 
     #[ORM\ManyToOne(inversedBy: 'transactions')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $user = null;
+    private ?User $users = null;
 
     #[ORM\Column(length: 255)]
     private ?string $solde = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $AccountNumber = null;
+    #[ORM\Column(length: 255)]
+    private ?string $accountNumber = null;
 
     #[ORM\Column(length: 255)]
     private ?string $soldeAriary = null;
@@ -41,32 +40,31 @@ class Transaction
     private ?GasyWallet $gasyWallet = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $date = null;
+    private ?\DateTimeInterface $transactionAt = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?bool $beingProcessed = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?bool $verified = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?bool $transactionDone = null;
-    
+
     #[ORM\Column(nullable: true)]
     private ?bool $failed = null;
 
     #[ORM\Column]
     private ?bool $policyAgreement = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $referenceManavola = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $transactionId = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $RPObtenu = null;
-
+    #[ORM\Column(length: 255)]
+    private ?string $RPObtenue = null;
 
     public function getId(): ?int
     {
@@ -78,21 +76,21 @@ class Transaction
         return $this->transactionType;
     }
 
-    public function setTransactionType(string $transactionType): self
+    public function setTransactionType(string $transactionType): static
     {
         $this->transactionType = $transactionType;
 
         return $this;
     }
 
-    public function getUser(): ?User
+    public function getUsers(): ?User
     {
-        return $this->user;
+        return $this->users;
     }
 
-    public function setUser(?User $user): self
+    public function setUsers(?User $users): static
     {
-        $this->user = $user;
+        $this->users = $users;
 
         return $this;
     }
@@ -102,7 +100,7 @@ class Transaction
         return $this->solde;
     }
 
-    public function setSolde(string $solde): self
+    public function setSolde(string $solde): static
     {
         $this->solde = $solde;
 
@@ -111,12 +109,12 @@ class Transaction
 
     public function getAccountNumber(): ?string
     {
-        return $this->AccountNumber;
+        return $this->accountNumber;
     }
 
-    public function setAccountNumber(?string $AccountNumber): self
+    public function setAccountNumber(string $accountNumber): static
     {
-        $this->AccountNumber = $AccountNumber;
+        $this->accountNumber = $accountNumber;
 
         return $this;
     }
@@ -126,7 +124,7 @@ class Transaction
         return $this->soldeAriary;
     }
 
-    public function setSoldeAriary(string $soldeAriary): self
+    public function setSoldeAriary(string $soldeAriary): static
     {
         $this->soldeAriary = $soldeAriary;
 
@@ -138,7 +136,7 @@ class Transaction
         return $this->cours;
     }
 
-    public function setCours(string $cours): self
+    public function setCours(string $cours): static
     {
         $this->cours = $cours;
 
@@ -150,7 +148,7 @@ class Transaction
         return $this->globalWallet;
     }
 
-    public function setGlobalWallet(?GlobalWallet $globalWallet): self
+    public function setGlobalWallet(?GlobalWallet $globalWallet): static
     {
         $this->globalWallet = $globalWallet;
 
@@ -162,21 +160,21 @@ class Transaction
         return $this->gasyWallet;
     }
 
-    public function setGasyWallet(?GasyWallet $gasyWallet): self
+    public function setGasyWallet(?GasyWallet $gasyWallet): static
     {
         $this->gasyWallet = $gasyWallet;
 
         return $this;
     }
 
-    public function getDate(): ?\DateTimeInterface
+    public function getTransactionAt(): ?\DateTimeInterface
     {
-        return $this->date;
+        return $this->transactionAt;
     }
 
-    public function setDate(\DateTimeInterface $date): self
+    public function setTransactionAt(\DateTimeInterface $transactionAt): static
     {
-        $this->date = $date;
+        $this->transactionAt = $transactionAt;
 
         return $this;
     }
@@ -186,7 +184,7 @@ class Transaction
         return $this->beingProcessed;
     }
 
-    public function setBeingProcessed(bool $beingProcessed): self
+    public function setBeingProcessed(?bool $beingProcessed): static
     {
         $this->beingProcessed = $beingProcessed;
 
@@ -198,7 +196,7 @@ class Transaction
         return $this->verified;
     }
 
-    public function setVerified(bool $verified): self
+    public function setVerified(?bool $verified): static
     {
         $this->verified = $verified;
 
@@ -210,9 +208,21 @@ class Transaction
         return $this->transactionDone;
     }
 
-    public function setTransactionDone(bool $transactionDone): self
+    public function setTransactionDone(?bool $transactionDone): static
     {
         $this->transactionDone = $transactionDone;
+
+        return $this;
+    }
+
+    public function isFailed(): ?bool
+    {
+        return $this->failed;
+    }
+
+    public function setFailed(?bool $failed): static
+    {
+        $this->failed = $failed;
 
         return $this;
     }
@@ -222,7 +232,7 @@ class Transaction
         return $this->policyAgreement;
     }
 
-    public function setPolicyAgreement(bool $policyAgreement): self
+    public function setPolicyAgreement(bool $policyAgreement): static
     {
         $this->policyAgreement = $policyAgreement;
 
@@ -234,7 +244,7 @@ class Transaction
         return $this->referenceManavola;
     }
 
-    public function setReferenceManavola(string $referenceManavola): self
+    public function setReferenceManavola(?string $referenceManavola): static
     {
         $this->referenceManavola = $referenceManavola;
 
@@ -246,33 +256,21 @@ class Transaction
         return $this->transactionId;
     }
 
-    public function setTransactionId(?string $transactionId): self
+    public function setTransactionId(?string $transactionId): static
     {
         $this->transactionId = $transactionId;
 
         return $this;
     }
 
-    public function isFailed(): ?bool
+    public function getRPObtenue(): ?string
     {
-        return $this->failed;
+        return $this->RPObtenue;
     }
 
-    public function setFailed(?bool $failed): self
+    public function setRPObtenue(string $RPObtenue): static
     {
-        $this->failed = $failed;
-
-        return $this;
-    }
-
-    public function getRPObtenu(): ?string
-    {
-        return $this->RPObtenu;
-    }
-
-    public function setRPObtenu(?string $RPObtenu): self
-    {
-        $this->RPObtenu = $RPObtenu;
+        $this->RPObtenue = $RPObtenue;
 
         return $this;
     }

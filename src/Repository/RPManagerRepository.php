@@ -21,24 +21,6 @@ class RPManagerRepository extends ServiceEntityRepository
         parent::__construct($registry, RPManager::class);
     }
 
-    public function save(RPManager $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->persist($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
-    public function remove(RPManager $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->remove($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
 //    /**
 //     * @return RPManager[] Returns an array of RPManager objects
 //     */

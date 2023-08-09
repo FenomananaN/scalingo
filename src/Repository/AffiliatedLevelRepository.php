@@ -21,24 +21,6 @@ class AffiliatedLevelRepository extends ServiceEntityRepository
         parent::__construct($registry, AffiliatedLevel::class);
     }
 
-    public function save(AffiliatedLevel $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->persist($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
-    public function remove(AffiliatedLevel $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->remove($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
 //    /**
 //     * @return AffiliatedLevel[] Returns an array of AffiliatedLevel objects
 //     */

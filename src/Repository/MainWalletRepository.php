@@ -21,24 +21,6 @@ class MainWalletRepository extends ServiceEntityRepository
         parent::__construct($registry, MainWallet::class);
     }
 
-    public function save(MainWallet $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->persist($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
-    public function remove(MainWallet $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->remove($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
 //    /**
 //     * @return MainWallet[] Returns an array of MainWallet objects
 //     */

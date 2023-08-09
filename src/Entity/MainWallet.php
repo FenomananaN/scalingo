@@ -39,7 +39,7 @@ class MainWallet
         return $this->mainWalletName;
     }
 
-    public function setMainWalletName(string $mainWalletName): self
+    public function setMainWalletName(string $mainWalletName): static
     {
         $this->mainWalletName = $mainWalletName;
 
@@ -51,13 +51,12 @@ class MainWallet
         return $this->logo;
     }
 
-    public function setLogo(string $logo): self
+    public function setLogo(string $logo): static
     {
         $this->logo = $logo;
 
         return $this;
     }
-
 
     /**
      * @return Collection<int, GlobalWallet>
@@ -67,7 +66,7 @@ class MainWallet
         return $this->globalWallets;
     }
 
-    public function addGlobalWallet(GlobalWallet $globalWallet): self
+    public function addGlobalWallet(GlobalWallet $globalWallet): static
     {
         if (!$this->globalWallets->contains($globalWallet)) {
             $this->globalWallets->add($globalWallet);
@@ -77,7 +76,7 @@ class MainWallet
         return $this;
     }
 
-    public function removeGlobalWallet(GlobalWallet $globalWallet): self
+    public function removeGlobalWallet(GlobalWallet $globalWallet): static
     {
         if ($this->globalWallets->removeElement($globalWallet)) {
             // set the owning side to null (unless already changed)

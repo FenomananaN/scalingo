@@ -37,7 +37,8 @@ class RPController extends AbstractController
 
         $rpManager->setRPInitial(1000);
         $rpManager->setRRAriary(25000);
-        $rpManager->setPObtenu(100);
+        $rpManager->setPObtenue(100);
+        $rpManager->setRPRate(0.5);
 
         //methode hi enregistrena azy amn ni base
         $this->em->getConnection()->beginTransaction();
@@ -66,7 +67,7 @@ class RPController extends AbstractController
         return $this->json([
             'RPInitial' => $rpManager->getRPInitial(),
             'RRAriary' => $rpManager->getRRAriary(),
-            'PObtenu' => $rpManager->getPObtenu(),
+            'PObtenue' => $rpManager->getPObtenue(),
             'RPRate' =>$rpManager->getRPRate()
         ]);
     }
@@ -80,8 +81,8 @@ class RPController extends AbstractController
 
         $rpManager->setRPInitial($request->request->get('RPInitial',$rpManager->getRPInitial()));
         $rpManager->setRRAriary($request->request->get('RRAriary',$rpManager->getRRAriary()));
-        $rpManager->setPObtenu($request->request->get('PObtenu',$rpManager->getPObtenu()));
-        $rpManager->setRPRAte($request->request->get('RPRAte',$rpManager->getRPRAte()));
+        $rpManager->setPObtenue($request->request->get('PObtenue',$rpManager->getPObtenue()));
+        $rpManager->setRPRate($request->request->get('RPRate',$rpManager->getRPRate()));
 
 
         //methode hi enregistrena azy amn ni base
@@ -108,7 +109,7 @@ class RPController extends AbstractController
         $cashOUtRP= new CashOutRP();
 
         $user=$this->getUser();
-        $cashOUtRP->setUser($user);
+        $cashOUtRP->setUsers($user);
 
         //new CurrentRP for User
         $user->setCurrentRP($user->getCurrentRP()-$request->request->get('RP'));
@@ -118,7 +119,7 @@ class RPController extends AbstractController
         $cashOUtRP->setMGAValue($request->request->get('MGAValue'));
         
         $cashOUtRP->setPhoneNumber($request->request->get('phoneNumber'));
-        $cashOUtRP->setDate(new \DateTime());
+        $cashOUtRP->setCashoutAt(new \DateTime());
         
         //methode hi enregistrena azy amn ni base
         $this->em->getConnection()->beginTransaction();

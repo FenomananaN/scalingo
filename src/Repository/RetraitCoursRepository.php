@@ -20,34 +20,17 @@ class RetraitCoursRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, RetraitCours::class);
     }
-
+    
     public function findCoursByWalletId(int $id)
     {
         return $this->createQueryBuilder('r')
-            ->andWhere('r.Wallet = :id')
+            ->andWhere('r.wallet = :id')
             ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult()
         ;
     }
 
-    public function save(RetraitCours $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->persist($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
-    public function remove(RetraitCours $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->remove($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
 
 //    /**
 //     * @return RetraitCours[] Returns an array of RetraitCours objects

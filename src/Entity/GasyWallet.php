@@ -24,19 +24,14 @@ class GasyWallet
     #[ORM\Column(length: 255)]
     private ?string $logo = null;
 
-    #[ORM\OneToMany(mappedBy: 'gasyWallet', targetEntity: Depot::class)]
-    private Collection $depots;
-
-    #[ORM\OneToMany(mappedBy: 'gasyWallet', targetEntity: Retrait::class)]
-    private Collection $retraits;
+    #[ORM\Column(length: 255)]
+    private ?string $logoMain = null;
 
     #[ORM\OneToMany(mappedBy: 'gasyWallet', targetEntity: Transaction::class)]
     private Collection $transactions;
 
     public function __construct()
     {
-        $this->depots = new ArrayCollection();
-        $this->retraits = new ArrayCollection();
         $this->transactions = new ArrayCollection();
     }
 
@@ -50,7 +45,7 @@ class GasyWallet
         return $this->gasyWalletName;
     }
 
-    public function setGasyWalletName(string $gasyWalletName): self
+    public function setGasyWalletName(string $gasyWalletName): static
     {
         $this->gasyWalletName = $gasyWalletName;
 
@@ -62,7 +57,7 @@ class GasyWallet
         return $this->reserve;
     }
 
-    public function setReserve(string $reserve): self
+    public function setReserve(string $reserve): static
     {
         $this->reserve = $reserve;
 
@@ -74,69 +69,21 @@ class GasyWallet
         return $this->logo;
     }
 
-    public function setLogo(string $logo): self
+    public function setLogo(string $logo): static
     {
         $this->logo = $logo;
 
         return $this;
     }
 
-    /**
-     * @return Collection<int, Depot>
-     */
-    public function getDepots(): Collection
+    public function getLogoMain(): ?string
     {
-        return $this->depots;
+        return $this->logoMain;
     }
 
-    public function addDepot(Depot $depot): self
+    public function setLogoMain(string $logoMain): static
     {
-        if (!$this->depots->contains($depot)) {
-            $this->depots->add($depot);
-            $depot->setGasyWallet($this);
-        }
-
-        return $this;
-    }
-
-    public function removeDepot(Depot $depot): self
-    {
-        if ($this->depots->removeElement($depot)) {
-            // set the owning side to null (unless already changed)
-            if ($depot->getGasyWallet() === $this) {
-                $depot->setGasyWallet(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Retrait>
-     */
-    public function getRetraits(): Collection
-    {
-        return $this->retraits;
-    }
-
-    public function addRetrait(Retrait $retrait): self
-    {
-        if (!$this->retraits->contains($retrait)) {
-            $this->retraits->add($retrait);
-            $retrait->setGasyWallet($this);
-        }
-
-        return $this;
-    }
-
-    public function removeRetrait(Retrait $retrait): self
-    {
-        if ($this->retraits->removeElement($retrait)) {
-            // set the owning side to null (unless already changed)
-            if ($retrait->getGasyWallet() === $this) {
-                $retrait->setGasyWallet(null);
-            }
-        }
+        $this->logoMain = $logoMain;
 
         return $this;
     }
@@ -149,7 +96,7 @@ class GasyWallet
         return $this->transactions;
     }
 
-    public function addTransaction(Transaction $transaction): self
+    public function addTransaction(Transaction $transaction): static
     {
         if (!$this->transactions->contains($transaction)) {
             $this->transactions->add($transaction);
@@ -159,7 +106,7 @@ class GasyWallet
         return $this;
     }
 
-    public function removeTransaction(Transaction $transaction): self
+    public function removeTransaction(Transaction $transaction): static
     {
         if ($this->transactions->removeElement($transaction)) {
             // set the owning side to null (unless already changed)

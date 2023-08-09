@@ -24,7 +24,7 @@ class GlobalWallet
     private ?Wallet $wallet = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Reserve = null;
+    private ?string $reserve = null;
 
     #[ORM\Column(length: 255)]
     private ?string $link = null;
@@ -35,28 +35,20 @@ class GlobalWallet
     #[ORM\Column]
     private ?float $fraisDepot = null;
 
-    #[ORM\OneToMany(mappedBy: 'globalWallet', targetEntity: Depot::class)]
-    private Collection $depots;
-
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column]
     private ?float $fraisWallet = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column]
     private ?float $fraisBlockchain = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?float $fraisRetrait = null;
-
-    #[ORM\OneToMany(mappedBy: 'globalWallet', targetEntity: Retrait::class)]
-    private Collection $retraits;
 
     #[ORM\OneToMany(mappedBy: 'globalWallet', targetEntity: Transaction::class)]
     private Collection $transactions;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $fraisRetrait = null;
+
     public function __construct()
     {
-        $this->depots = new ArrayCollection();
-        $this->retraits = new ArrayCollection();
         $this->transactions = new ArrayCollection();
     }
 
@@ -70,7 +62,7 @@ class GlobalWallet
         return $this->mainWallet;
     }
 
-    public function setMainWallet(?MainWallet $mainWallet): self
+    public function setMainWallet(?MainWallet $mainWallet): static
     {
         $this->mainWallet = $mainWallet;
 
@@ -82,7 +74,7 @@ class GlobalWallet
         return $this->wallet;
     }
 
-    public function setWallet(?Wallet $wallet): self
+    public function setWallet(?Wallet $wallet): static
     {
         $this->wallet = $wallet;
 
@@ -91,12 +83,12 @@ class GlobalWallet
 
     public function getReserve(): ?string
     {
-        return $this->Reserve;
+        return $this->reserve;
     }
 
-    public function setReserve(string $Reserve): self
+    public function setReserve(string $reserve): static
     {
-        $this->Reserve = $Reserve;
+        $this->reserve = $reserve;
 
         return $this;
     }
@@ -106,7 +98,7 @@ class GlobalWallet
         return $this->link;
     }
 
-    public function setLink(string $link): self
+    public function setLink(string $link): static
     {
         $this->link = $link;
 
@@ -118,7 +110,7 @@ class GlobalWallet
         return $this->fraisDepotCharged;
     }
 
-    public function setFraisDepotCharged(bool $fraisDepotCharged): self
+    public function setFraisDepotCharged(bool $fraisDepotCharged): static
     {
         $this->fraisDepotCharged = $fraisDepotCharged;
 
@@ -130,39 +122,9 @@ class GlobalWallet
         return $this->fraisDepot;
     }
 
-    public function setFraisDepot(float $fraisDepot): self
+    public function setFraisDepot(float $fraisDepot): static
     {
         $this->fraisDepot = $fraisDepot;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Depot>
-     */
-    public function getDepots(): Collection
-    {
-        return $this->depots;
-    }
-
-    public function addDepot(Depot $depot): self
-    {
-        if (!$this->depots->contains($depot)) {
-            $this->depots->add($depot);
-            $depot->setGlobalWallet($this);
-        }
-
-        return $this;
-    }
-
-    public function removeDepot(Depot $depot): self
-    {
-        if ($this->depots->removeElement($depot)) {
-            // set the owning side to null (unless already changed)
-            if ($depot->getGlobalWallet() === $this) {
-                $depot->setGlobalWallet(null);
-            }
-        }
 
         return $this;
     }
@@ -172,7 +134,7 @@ class GlobalWallet
         return $this->fraisWallet;
     }
 
-    public function setFraisWallet(?float $fraisWallet): self
+    public function setFraisWallet(float $fraisWallet): static
     {
         $this->fraisWallet = $fraisWallet;
 
@@ -184,51 +146,9 @@ class GlobalWallet
         return $this->fraisBlockchain;
     }
 
-    public function setFraisBlockchain(?float $fraisBlockchain): self
+    public function setFraisBlockchain(float $fraisBlockchain): static
     {
         $this->fraisBlockchain = $fraisBlockchain;
-
-        return $this;
-    }
-
-    public function getFraisRetrait(): ?float
-    {
-        return $this->fraisRetrait;
-    }
-
-    public function setFraisRetrait(?float $fraisRetrait): self
-    {
-        $this->fraisRetrait = $fraisRetrait;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Retrait>
-     */
-    public function getRetraits(): Collection
-    {
-        return $this->retraits;
-    }
-
-    public function addRetrait(Retrait $retrait): self
-    {
-        if (!$this->retraits->contains($retrait)) {
-            $this->retraits->add($retrait);
-            $retrait->setGlobalWallet($this);
-        }
-
-        return $this;
-    }
-
-    public function removeRetrait(Retrait $retrait): self
-    {
-        if ($this->retraits->removeElement($retrait)) {
-            // set the owning side to null (unless already changed)
-            if ($retrait->getGlobalWallet() === $this) {
-                $retrait->setGlobalWallet(null);
-            }
-        }
 
         return $this;
     }
@@ -241,7 +161,7 @@ class GlobalWallet
         return $this->transactions;
     }
 
-    public function addTransaction(Transaction $transaction): self
+    public function addTransaction(Transaction $transaction): static
     {
         if (!$this->transactions->contains($transaction)) {
             $this->transactions->add($transaction);
@@ -251,7 +171,7 @@ class GlobalWallet
         return $this;
     }
 
-    public function removeTransaction(Transaction $transaction): self
+    public function removeTransaction(Transaction $transaction): static
     {
         if ($this->transactions->removeElement($transaction)) {
             // set the owning side to null (unless already changed)
@@ -259,6 +179,18 @@ class GlobalWallet
                 $transaction->setGlobalWallet(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getFraisRetrait(): ?float
+    {
+        return $this->fraisRetrait;
+    }
+
+    public function setFraisRetrait(?float $fraisRetrait): static
+    {
+        $this->fraisRetrait = $fraisRetrait;
 
         return $this;
     }

@@ -20,9 +20,9 @@ class RPManager
     private ?int $RRAriary = null;
 
     #[ORM\Column]
-    private ?int $PObtenu = null;
+    private ?int $PObtenue = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 255)]
     private ?string $RPRate = null;
 
     public function getId(): ?int
@@ -35,7 +35,7 @@ class RPManager
         return $this->RPInitial;
     }
 
-    public function setRPInitial(int $RPInitial): self
+    public function setRPInitial(int $RPInitial): static
     {
         $this->RPInitial = $RPInitial;
 
@@ -47,21 +47,21 @@ class RPManager
         return $this->RRAriary;
     }
 
-    public function setRRAriary(int $RRAriary): self
+    public function setRRAriary(int $RRAriary): static
     {
         $this->RRAriary = $RRAriary;
 
         return $this;
     }
 
-    public function getPObtenu(): ?int
+    public function getPObtenue(): ?int
     {
-        return $this->PObtenu;
+        return $this->PObtenue;
     }
 
-    public function setPObtenu(int $PObtenu): self
+    public function setPObtenue(int $PObtenue): static
     {
-        $this->PObtenu = $PObtenu;
+        $this->PObtenue = $PObtenue;
 
         return $this;
     }
@@ -71,7 +71,7 @@ class RPManager
         return $this->RPRate;
     }
 
-    public function setRPRate(?string $RPRate): self
+    public function setRPRate(string $RPRate): static
     {
         $this->RPRate = $RPRate;
 

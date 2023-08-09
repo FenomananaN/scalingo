@@ -133,7 +133,6 @@ class RegisterController extends AbstractController
         //hashing the password
         $hashedPassword = $passwordhasher->hashPassword($user, $plainPassword);
         $user->setPassword($hashedPassword);
-        $user->setFidelityPt(0);
         $user->setVerifiedStatus(false);
         $user->setVerificationFailed(false);
         $user->setCreatedAt(new \DateTime());
@@ -148,27 +147,28 @@ class RegisterController extends AbstractController
         //  $user=$this->userRepository->findOneByEmail('fenomanana.nomenjanahary@gmail.com');
 
         $affiliated = new Affiliated();
-        $affiliated->setUser($user);
-        $affiliated->setMvx(0);
+        $affiliated->setUsers($user);
+        $affiliated->setCommision(0);
 
         //creating the generated parrainageId
-        $parrainages = $this->affiliatedRepository->findAllParrainageId();
-        $parrainageId = array();
-        foreach ($parrainages as $key => $parrainage) {
-            $parrainageId[$key] = $parrainage['parrainageId'];
+        $mvxIds = $this->affiliatedRepository->findAllMvxId();
+        $mvxId = array();
+        foreach ($mvxIds as $key => $parrainage) {
+            $mvxId[$key] = $parrainage['mvxId'];
         }
-        $newParrainageId = $this->randomMVXId->getNewMVXId($parrainageId);
-        $affiliated->setParrainageId($newParrainageId);
+
+        $newMvxId = $this->randomMVXId->getNewMVXId($mvxId);
+        $affiliated->setMvxId($newMvxId);
         //dd($affiliated);
         
 //hasian message flash
         //jerena raha nisi nanetana izy
-        $affiliater = $this->affiliatedRepository->findOneBy(['parrainageId' => $parrainerId]); //MVX56779 98575
+        $affiliater = $this->affiliatedRepository->findOneBy(['mvxId' => $parrainerId]); //MVX56779 98575
 
         if ($affiliater) {
             $affiliatedLevel = new AffiliatedLevel();
             $affiliatedLevel->setAffiliated($affiliater);
-            $affiliatedLevel->setUser($user);
+            $affiliatedLevel->setUsers($user);
         }
        // dump($affiliatedLevel);
        // dd($user);
@@ -196,7 +196,7 @@ class RegisterController extends AbstractController
             'user_id' => $user->getId(),
             'email' => $email,
             'username' => $username,
-            'parrainageId' => $newParrainageId
+            'mvxId' => $newMvxId
         ]);
     }
     //, tags: 'Register'
@@ -233,6 +233,8 @@ class RegisterController extends AbstractController
         ]
     )]
     #[OA\Response(response: '201', description: 'Created')]
+
+    //validation after registration// user non connected
     #[Route('/registerverificationn', name: 'app_register_verificationm', methods: 'POST')]
     public function verificationRegister(Request $request): JsonResponse
     {
@@ -241,7 +243,7 @@ class RegisterController extends AbstractController
             $user = $this->userRepository->findOneByEmail($request->request->get('email'));
         }
         $userVerifiedInfo = new UserVerifiedInfo();
-        $userVerifiedInfo->setUser($user);
+        $userVerifiedInfo->setUsers($user);
 
         $user->setFullname($request->request->get('fullname'));
         $userVerifiedInfo->setNumeroCIN('' . $request->request->get('numeroCIN'));
@@ -253,7 +255,7 @@ class RegisterController extends AbstractController
         
         $filename = md5(uniqid()) . '.' . $file->guessClientExtension();
         $file->move($path, $filename);
-        $userVerifiedInfo->setRectophoto($filename);
+        $userVerifiedInfo->setRectoPhoto($filename);
 
         //set VersoPhotoCIN
         $file = $request->files->get('versoPhoto');
@@ -296,6 +298,7 @@ class RegisterController extends AbstractController
         ]);
     }
 
+    //validation user connected
     #[Route('/validate', name: 'app_register_validate', methods: 'POST')]
     public function validate(Request $request): JsonResponse
     {
@@ -305,7 +308,7 @@ class RegisterController extends AbstractController
         }
 
         $userVerifiedInfo = new UserVerifiedInfo();
-        $userVerifiedInfo->setUser($user);
+        $userVerifiedInfo->setUsers($user);
 
         $user->setFullname($request->request->get('fullname'));
         $userVerifiedInfo->setNumeroCIN('' . $request->request->get('numeroCIN'));
@@ -316,7 +319,7 @@ class RegisterController extends AbstractController
         //dump($file);
         $filename = md5(uniqid()) . '.' . $file->guessClientExtension();
         $file->move($path, $filename);
-        $userVerifiedInfo->setRectophoto($filename);
+        $userVerifiedInfo->setRectoPhoto($filename);
 
         //set VersoPhotoCIN
         $file = $request->files->get('versoPhoto');
@@ -329,6 +332,9 @@ class RegisterController extends AbstractController
         $filename = md5(uniqid()) . '.' . $file->guessClientExtension();
         $file->move($path, $filename);
         $userVerifiedInfo->setSelfieAvecCIN($filename);
+
+        //set the time of verification
+        $userVerifiedInfo->setVerifiedAt(new \DateTime());
         
         //set VerifiedStatus to true
         $user->setVerificationPending(true);

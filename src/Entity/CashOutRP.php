@@ -16,7 +16,7 @@ class CashOutRP
 
     #[ORM\ManyToOne(inversedBy: 'cashOutRPs')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $user = null;
+    private ?User $users = null;
 
     #[ORM\Column(length: 255)]
     private ?string $RP = null;
@@ -27,25 +27,40 @@ class CashOutRP
     #[ORM\Column(length: 255)]
     private ?string $MGAValue = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $Date = null;
-
     #[ORM\Column(length: 255)]
     private ?string $phoneNumber = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $name = null;
+
+    #[ORM\Column]
+    private ?bool $beingProcessed = null;
+
+    #[ORM\Column]
+    private ?bool $verified = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $cashoutSuccessed = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $cashoutFailed = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $cashoutAt = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getUsers(): ?User
     {
-        return $this->user;
+        return $this->users;
     }
 
-    public function setUser(?User $user): self
+    public function setUsers(?User $users): static
     {
-        $this->user = $user;
+        $this->users = $users;
 
         return $this;
     }
@@ -55,7 +70,7 @@ class CashOutRP
         return $this->RP;
     }
 
-    public function setRP(string $RP): self
+    public function setRP(string $RP): static
     {
         $this->RP = $RP;
 
@@ -67,7 +82,7 @@ class CashOutRP
         return $this->RPRate;
     }
 
-    public function setRPRate(string $RPRate): self
+    public function setRPRate(string $RPRate): static
     {
         $this->RPRate = $RPRate;
 
@@ -79,21 +94,9 @@ class CashOutRP
         return $this->MGAValue;
     }
 
-    public function setMGAValue(string $MGAValue): self
+    public function setMGAValue(string $MGAValue): static
     {
         $this->MGAValue = $MGAValue;
-
-        return $this;
-    }
-
-    public function getDate(): ?\DateTimeInterface
-    {
-        return $this->Date;
-    }
-
-    public function setDate(\DateTimeInterface $Date): self
-    {
-        $this->Date = $Date;
 
         return $this;
     }
@@ -103,9 +106,81 @@ class CashOutRP
         return $this->phoneNumber;
     }
 
-    public function setPhoneNumber(string $phoneNumber): self
+    public function setPhoneNumber(string $phoneNumber): static
     {
         $this->phoneNumber = $phoneNumber;
+
+        return $this;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(?string $name): static
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function isBeingProcessed(): ?bool
+    {
+        return $this->beingProcessed;
+    }
+
+    public function setBeingProcessed(bool $beingProcessed): static
+    {
+        $this->beingProcessed = $beingProcessed;
+
+        return $this;
+    }
+
+    public function isVerified(): ?bool
+    {
+        return $this->verified;
+    }
+
+    public function setVerified(bool $verified): static
+    {
+        $this->verified = $verified;
+
+        return $this;
+    }
+
+    public function isCashoutSuccessed(): ?bool
+    {
+        return $this->cashoutSuccessed;
+    }
+
+    public function setCashoutSuccessed(?bool $cashoutSuccessed): static
+    {
+        $this->cashoutSuccessed = $cashoutSuccessed;
+
+        return $this;
+    }
+
+    public function isCashoutFailed(): ?bool
+    {
+        return $this->cashoutFailed;
+    }
+
+    public function setCashoutFailed(?bool $cashoutFailed): static
+    {
+        $this->cashoutFailed = $cashoutFailed;
+
+        return $this;
+    }
+
+    public function getCashoutAt(): ?\DateTimeInterface
+    {
+        return $this->cashoutAt;
+    }
+
+    public function setCashoutAt(\DateTimeInterface $cashoutAt): static
+    {
+        $this->cashoutAt = $cashoutAt;
 
         return $this;
     }

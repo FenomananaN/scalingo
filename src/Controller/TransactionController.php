@@ -56,7 +56,7 @@ class TransactionController extends AbstractController
         // $gasyWallet = $this->gasyWalletRepository->findOneById($request->request->get('gasyWallet_id'));
 
         $depot = new Transaction();
-        $depot->setUser($user);
+        $depot->setUsers($user);
         $depot->setGlobalWallet($globalWallet);
         // $depot->setGasyWallet($gasyWallet);
         $depot->setSolde($request->request->get('solde_demande'));
@@ -65,14 +65,14 @@ class TransactionController extends AbstractController
         $depot->setSoldeAriary($request->request->get('total_to_paid'));
         $depot->setCours($request->request->get('cours'));
         $depot->setPolicyAgreement($request->request->get('check_agreement'));
-        $depot->setDate(new \DateTime());
+        $depot->setTransactionAt(new \DateTime());
         $depot->setBeingProcessed(false);
         $depot->setTransactionDone(false);
         $depot->setVerified(false);
 
         //add RP
         $rp=$this->rPUtils->RPO($depot->getSoldeAriary());
-        $depot->setRPObtenu($rp);
+        $depot->setRPObtenue($rp);
 
         //new CurrentRP
         $user->setCurrentRP($user->getCurrentRP()+$rp);
@@ -111,7 +111,7 @@ class TransactionController extends AbstractController
             'total_to_paid' => $depot->getSoldeAriary(),
             'referenceManavola' => $depot->getReferenceManavola(),
             'cours' => $depot->getCours(),
-            'date' => $depot->getDate(),
+            'date' => $depot->getTransactionAt(),
             'mainWallet' => $depot->getGlobalWallet()->getMainWallet()->getMainWalletName(),
             'mainWalletLogo' => $depot->getGlobalWallet()->getMainWallet()->getLogo(),
             'wallet' => $depot->getGlobalWallet()->getWallet()->getWalletName(),
@@ -169,7 +169,7 @@ class TransactionController extends AbstractController
             }
         }
 
-        $retrait->setUser($user);
+        $retrait->setUsers($user);
 
         //get wallet type
         $globalWallet = $this->globalWalletRepository->findOneById($request->request->get('globalWallet_id'));
@@ -185,14 +185,14 @@ class TransactionController extends AbstractController
         $retrait->setSoldeAriary($request->request->get('total_to_receive'));
         $retrait->setCours($request->request->get('cours'));
         $retrait->setPolicyAgreement($request->request->get('check_agreement'));
-        $retrait->setDate(new \DateTime());
+        $retrait->setTransactionAt(new \DateTime());
         $retrait->setVerified(false);
         $retrait->setBeingProcessed(false);
         $retrait->setTransactionDone(false);
-
+        $retrait->setAccountNumber('none');
         ////add RP
         $rp=$this->rPUtils->RPO($retrait->getSoldeAriary());
-        $retrait->setRPObtenu($rp);
+        $retrait->setRPObtenue($rp);
 
         //new CurrentRP
         $user->setCurrentRP($user->getCurrentRP()+$rp);
@@ -227,7 +227,7 @@ class TransactionController extends AbstractController
             'total_to_receive' => $retrait->getSoldeAriary(),
             'referenceManavola' => $retrait->getReferenceManavola(),
             'cours' => $retrait->getCours(),
-            'date' => $retrait->getDate(),
+            'date' => $retrait->getTransactionAt(),
             'mobile'=>$retrait->getGasyWallet()->getGasyWalletName(),
             'mobileLogo'=>$retrait->getGasyWallet()->getLogo(),
             'mainWallet' => $retrait->getGlobalWallet()->getMainWallet()->getMainWalletName(),
@@ -287,21 +287,25 @@ class TransactionController extends AbstractController
             $transaction[$key]['mainWalletLogo'] = $transac->getGlobalWallet()->getMainWallet()->getLogo();
             $transaction[$key]['wallet'] = $transac->getGlobalWallet()->getWallet()->getWalletName();
             $transaction[$key]['currency'] = $transac->getGlobalWallet()->getWallet()->getCurrency();
+            $transaction[$key]['walletLogoMain'] = $transac->getGlobalWallet()->getWallet()->getLogoMain();
             $transaction[$key]['walletLogo'] = $transac->getGlobalWallet()->getWallet()->getLogo();
             if(!$transac->getGasyWallet()){
                 $transaction[$key]['gasyWallet'] = 'null';
                 $transaction[$key]['gasyWalletLogo'] = 'null';
+                $transaction[$key]['gasyWalletLogoMain'] = 'null';
             } else {
                 $transaction[$key]['gasyWallet'] = $transac->getGasyWallet()->getGasyWalletName();
                 $transaction[$key]['gasyWalletLogo'] = $transac->getGasyWallet()->getLogo();
+                $transaction[$key]['gasyWalletLogoMain'] = $transac->getGasyWallet()->getLogoMain();
             }
-            $transaction[$key]['date'] = $transac->getDate();
+            $transaction[$key]['date'] = $transac->getTransactionAt();
             $transaction[$key]['referenceManavola'] = $transac->getReferenceManavola();
             $transaction[$key]['transactionId'] = $transac->getTransactionId();
             $transaction[$key]['beingProcessed'] = $transac->isBeingProcessed();
             $transaction[$key]['verified'] = $transac->isVerified();
             $transaction[$key]['transactionDone'] = $transac->isTransactionDone();
             $transaction[$key]['failed'] = $transac->isFailed();
+            $transaction[$key]['rp'] = $transac->getRPObtenue();
 
             //soldeAriary cours globalWallet gasyWallet date referenceManavola transactionId //policyAgreement transactionDone verified beingProcessed
         }
@@ -329,13 +333,16 @@ class TransactionController extends AbstractController
             $transaction[$key]['mainWalletLogo'] = $transac->getGlobalWallet()->getMainWallet()->getLogo();
             $transaction[$key]['wallet'] = $transac->getGlobalWallet()->getWallet()->getWalletName();
             $transaction[$key]['currency'] = $transac->getGlobalWallet()->getWallet()->getCurrency();
+            $transaction[$key]['walletLogoMain'] = $transac->getGlobalWallet()->getWallet()->getLogoMain();
             $transaction[$key]['walletLogo'] = $transac->getGlobalWallet()->getWallet()->getLogo();
             if(!$transac->getGasyWallet()){
                 $transaction[$key]['gasyWallet'] = 'null';
                 $transaction[$key]['gasyWalletLogo'] = 'null';
+                $transaction[$key]['gasyWalletLogoMain'] = 'null';
             } else {
                 $transaction[$key]['gasyWallet'] = $transac->getGasyWallet()->getGasyWalletName();
                 $transaction[$key]['gasyWalletLogo'] = $transac->getGasyWallet()->getLogo();
+                $transaction[$key]['gasyWalletLogoMain'] = $transac->getGasyWallet()->getLogoMain();
             }
             $transaction[$key]['date'] = $transac->getDate();
             $transaction[$key]['referenceManavola'] = $transac->getReferenceManavola();
@@ -344,6 +351,7 @@ class TransactionController extends AbstractController
             $transaction[$key]['verified'] = $transac->isVerified();
             $transaction[$key]['transactionDone'] = $transac->isTransactionDone();
             $transaction[$key]['failed'] = $transac->isFailed();
+            $transaction[$key]['rp'] = $transac->getRPObtenu();
 
             //soldeAriary cours globalWallet gasyWallet date referenceManavola transactionId //policyAgreement transactionDone verified beingProcessed
         }
@@ -372,15 +380,18 @@ class TransactionController extends AbstractController
             $transaction[$key]['mainWalletLogo'] = $transac->getGlobalWallet()->getMainWallet()->getLogo();
             $transaction[$key]['wallet'] = $transac->getGlobalWallet()->getWallet()->getWalletName();
             $transaction[$key]['currency'] = $transac->getGlobalWallet()->getWallet()->getCurrency();
+            $transaction[$key]['walletLogoMain'] = $transac->getGlobalWallet()->getWallet()->getLogoMain();
             $transaction[$key]['walletLogo'] = $transac->getGlobalWallet()->getWallet()->getLogo();
             if(!$transac->getGasyWallet()){
                 $transaction[$key]['gasyWallet'] = 'null';
                 $transaction[$key]['gasyWalletLogo'] = 'null';
+                $transaction[$key]['gasyWalletLogoMain'] = 'null';
             } else {
                 $transaction[$key]['gasyWallet'] = $transac->getGasyWallet()->getGasyWalletName();
                 $transaction[$key]['gasyWalletLogo'] = $transac->getGasyWallet()->getLogo();
+                $transaction[$key]['gasyWalletLogoMain'] = $transac->getGasyWallet()->getLogoMain();
             }
-            $transaction[$key]['date'] = $transac->getDate();
+            $transaction[$key]['date'] = $transac->getTransactionAt();
             $transaction[$key]['referenceManavola'] = $transac->getReferenceManavola();
             $transaction[$key]['transactionId'] = $transac->getTransactionId();
             $transaction[$key]['beingProcessed'] = $transac->isBeingProcessed();
@@ -414,15 +425,18 @@ class TransactionController extends AbstractController
             $transaction[$key]['mainWalletLogo'] = $transac->getGlobalWallet()->getMainWallet()->getLogo();
             $transaction[$key]['wallet'] = $transac->getGlobalWallet()->getWallet()->getWalletName();
             $transaction[$key]['currency'] = $transac->getGlobalWallet()->getWallet()->getCurrency();
+            $transaction[$key]['walletLogoMain'] = $transac->getGlobalWallet()->getWallet()->getLogoMain();
             $transaction[$key]['walletLogo'] = $transac->getGlobalWallet()->getWallet()->getLogo();
             if(!$transac->getGasyWallet()){
                 $transaction[$key]['gasyWallet'] = 'null';
                 $transaction[$key]['gasyWalletLogo'] = 'null';
+                $transaction[$key]['gasyWalletLogoMain'] = 'null';
             } else {
                 $transaction[$key]['gasyWallet'] = $transac->getGasyWallet()->getGasyWalletName();
                 $transaction[$key]['gasyWalletLogo'] = $transac->getGasyWallet()->getLogo();
+                $transaction[$key]['gasyWalletLogoMain'] = $transac->getGasyWallet()->getLogoMain();
             }
-            $transaction[$key]['date'] = $transac->getDate();
+            $transaction[$key]['date'] = $transac->getTransactionAt();
             $transaction[$key]['referenceManavola'] = $transac->getReferenceManavola();
             $transaction[$key]['transactionId'] = $transac->getTransactionId();
             $transaction[$key]['beingProcessed'] = $transac->isBeingProcessed();
@@ -448,8 +462,8 @@ class TransactionController extends AbstractController
         foreach ($_transaction as $key => $transac) {
             $transaction[$key]['id'] = $transac->getId();
             $transaction[$key]['transactionType'] = $transac->getTransactionType();
-            $transaction[$key]['username'] = $transac->getUser()->getUsername();
-            $transaction[$key]['manavolaId'] = $transac->getUser()->getAffiliated()->getParrainageId();
+            $transaction[$key]['username'] = $transac->getUsers()->getUsername();
+            $transaction[$key]['manavolaId'] = $transac->getUsers()->getAffiliated()->getMvxId();
             $transaction[$key]['solde'] = $transac->getSolde();
             $transaction[$key]['AccountNumber'] = $transac->getAccountNumber();
             $transaction[$key]['soldeAriary'] = $transac->getSoldeAriary();
@@ -458,15 +472,18 @@ class TransactionController extends AbstractController
             $transaction[$key]['mainWalletLogo'] = $transac->getGlobalWallet()->getMainWallet()->getLogo();
             $transaction[$key]['wallet'] = $transac->getGlobalWallet()->getWallet()->getWalletName();
             $transaction[$key]['currency'] = $transac->getGlobalWallet()->getWallet()->getCurrency();
+            $transaction[$key]['walletLogoMain'] = $transac->getGlobalWallet()->getWallet()->getLogoMain();
             $transaction[$key]['walletLogo'] = $transac->getGlobalWallet()->getWallet()->getLogo();
             if(!$transac->getGasyWallet()){
                 $transaction[$key]['gasyWallet'] = 'null';
                 $transaction[$key]['gasyWalletLogo'] = 'null';
+                $transaction[$key]['gasyWalletLogoMain'] = 'null';
             } else {
                 $transaction[$key]['gasyWallet'] = $transac->getGasyWallet()->getGasyWalletName();
                 $transaction[$key]['gasyWalletLogo'] = $transac->getGasyWallet()->getLogo();
+                $transaction[$key]['gasyWalletLogoMain'] = $transac->getGasyWallet()->getLogoMain();
             }
-            $transaction[$key]['date'] = $transac->getDate();
+            $transaction[$key]['date'] = $transac->getTransactionAt();
             $transaction[$key]['referenceManavola'] = $transac->getReferenceManavola();
             $transaction[$key]['transactionId'] = $transac->getTransactionId();
             $transaction[$key]['beingProcessed'] = $transac->isBeingProcessed();
@@ -492,8 +509,8 @@ class TransactionController extends AbstractController
         foreach ($_transaction as $key => $transac) {
             $transaction[$key]['id'] = $transac->getId();
             $transaction[$key]['transactionType'] = $transac->getTransactionType();
-            $transaction[$key]['username'] = $transac->getUser()->getUsername();
-            $transaction[$key]['manavolaId'] = $transac->getUser()->getAffiliated()->getParrainageId();
+            $transaction[$key]['username'] = $transac->getUsers()->getUsername();
+            $transaction[$key]['manavolaId'] = $transac->getUsers()->getAffiliated()->getMvxId();
             $transaction[$key]['solde'] = $transac->getSolde();
             $transaction[$key]['AccountNumber'] = $transac->getAccountNumber();
             $transaction[$key]['soldeAriary'] = $transac->getSoldeAriary();
@@ -502,15 +519,18 @@ class TransactionController extends AbstractController
             $transaction[$key]['mainWalletLogo'] = $transac->getGlobalWallet()->getMainWallet()->getLogo();
             $transaction[$key]['wallet'] = $transac->getGlobalWallet()->getWallet()->getWalletName();
             $transaction[$key]['currency'] = $transac->getGlobalWallet()->getWallet()->getCurrency();
+            $transaction[$key]['walletLogoMain'] = $transac->getGlobalWallet()->getWallet()->getLogoMain();
             $transaction[$key]['walletLogo'] = $transac->getGlobalWallet()->getWallet()->getLogo();
             if(!$transac->getGasyWallet()){
                 $transaction[$key]['gasyWallet'] = 'null';
                 $transaction[$key]['gasyWalletLogo'] = 'null';
+                $transaction[$key]['gasyWalletLogoMain'] = 'null';
             } else {
                 $transaction[$key]['gasyWallet'] = $transac->getGasyWallet()->getGasyWalletName();
                 $transaction[$key]['gasyWalletLogo'] = $transac->getGasyWallet()->getLogo();
+                $transaction[$key]['gasyWalletLogoMain'] = $transac->getGasyWallet()->getLogoMain();
             }
-            $transaction[$key]['date'] = $transac->getDate();
+            $transaction[$key]['date'] = $transac->getTransactionAt();
             $transaction[$key]['referenceManavola'] = $transac->getReferenceManavola();
             $transaction[$key]['transactionId'] = $transac->getTransactionId();
             $transaction[$key]['beingProcessed'] = $transac->isBeingProcessed();
@@ -536,8 +556,8 @@ class TransactionController extends AbstractController
         foreach ($_transaction as $key => $transac) {
             $transaction[$key]['id'] = $transac->getId();
             $transaction[$key]['transactionType'] = $transac->getTransactionType();
-            $transaction[$key]['username'] = $transac->getUser()->getUsername();
-            $transaction[$key]['manavolaId'] = $transac->getUser()->getAffiliated()->getParrainageId();
+            $transaction[$key]['username'] = $transac->getUsers()->getUsername();
+            $transaction[$key]['manavolaId'] = $transac->getUsers()->getAffiliated()->getMvxId();
             $transaction[$key]['solde'] = $transac->getSolde();
             $transaction[$key]['AccountNumber'] = $transac->getAccountNumber();
             $transaction[$key]['soldeAriary'] = $transac->getSoldeAriary();
@@ -546,15 +566,18 @@ class TransactionController extends AbstractController
             $transaction[$key]['mainWalletLogo'] = $transac->getGlobalWallet()->getMainWallet()->getLogo();
             $transaction[$key]['wallet'] = $transac->getGlobalWallet()->getWallet()->getWalletName();
             $transaction[$key]['currency'] = $transac->getGlobalWallet()->getWallet()->getCurrency();
+            $transaction[$key]['walletLogoMain'] = $transac->getGlobalWallet()->getWallet()->getLogoMain();
             $transaction[$key]['walletLogo'] = $transac->getGlobalWallet()->getWallet()->getLogo();
             if(!$transac->getGasyWallet()){
                 $transaction[$key]['gasyWallet'] = 'null';
                 $transaction[$key]['gasyWalletLogo'] = 'null';
+                $transaction[$key]['gasyWalletLogoMain'] = 'null';
             } else {
                 $transaction[$key]['gasyWallet'] = $transac->getGasyWallet()->getGasyWalletName();
                 $transaction[$key]['gasyWalletLogo'] = $transac->getGasyWallet()->getLogo();
+                $transaction[$key]['gasyWalletLogoMain'] = $transac->getGasyWallet()->getLogoMain();
             }
-            $transaction[$key]['date'] = $transac->getDate();
+            $transaction[$key]['date'] = $transac->getTransactionAt();
             $transaction[$key]['referenceManavola'] = $transac->getReferenceManavola();
             $transaction[$key]['transactionId'] = $transac->getTransactionId();
             $transaction[$key]['beingProcessed'] = $transac->isBeingProcessed();

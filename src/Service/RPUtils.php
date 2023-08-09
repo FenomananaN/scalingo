@@ -21,6 +21,6 @@ class RPUtils
         //formula 
         //RPO=VT/RR*PO
         
-        return floor($volumeTransaction/$rpManager->getRRAriary()*$rpManager->getPObtenu());
+        return floor($volumeTransaction/$rpManager->getRRAriary()*$rpManager->getPObtenue());
     }
 }

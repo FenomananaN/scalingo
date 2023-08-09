@@ -9,7 +9,6 @@ use App\Entity\MainWallet;
 use App\Entity\GlobalWallet;
 use App\Entity\RetraitCours;
 use OpenApi\Attributes as OA;
-use App\Repository\DepotRepository;
 use App\Repository\WalletRepository;
 use App\Repository\DepotCoursRepository;
 use App\Repository\GasyWalletRepository;
@@ -133,6 +132,17 @@ class WalletController extends AbstractController
         $wallet->setCurrency($request->request->get('currency'));
         //    $wallet->setCoursDepot($request->request->get('coursdepot'));
 
+
+        //for main logo
+        $file = $request->files->get('logoMain');
+
+        $path = $this->getParameter('kernel.project_dir') . '/public/image/logo';
+        $filename = md5(uniqid()) . '.' . $file->guessClientExtension();
+        $file->move($path, $filename);
+
+        $wallet->setLogoMain($filename);
+
+        //for sublogo
         $file = $request->files->get('logo');
 
         $path = $this->getParameter('kernel.project_dir') . '/public/image/logo';
@@ -140,8 +150,6 @@ class WalletController extends AbstractController
         $file->move($path, $filename);
 
         $wallet->setLogo($filename);
-        // $wallet->setCoursDepot($request->request->get("coursDepot", null));
-        //  $wallet->setCoursRetrait($request->request->get("coursRetrait", null));
 
         $this->em->getConnection()->beginTransaction();
         try {
@@ -157,6 +165,7 @@ class WalletController extends AbstractController
             'wallet_id' => $wallet->getId(),
             'wallet_name' => $wallet->getWalletName(),
             'currency' => $wallet->getCurrency(),
+            'wallet_logoMain' => $wallet->getLogoMain(),
             'wallet_logo' => $wallet->getLogo()
         ]);
     }
@@ -172,6 +181,8 @@ class WalletController extends AbstractController
         $link = $request->request->get('link');
         $fraisDepotCharged = $request->request->get('fraisDepotCharged', false);
         $fraisDepot = $request->request->get('fraisDepot');
+        
+        
 
         $mainWallet = $this->mainWalletRepository->findOneById($mainWallet);
         $wallet = $this->walletRepository->findOneById($wallet);
@@ -183,6 +194,8 @@ class WalletController extends AbstractController
         $globalWallet->setLink($link);
         $globalWallet->setFraisDepotCharged($fraisDepotCharged);
         $globalWallet->setFraisDepot($fraisDepot);
+        $globalWallet->setFraisWallet($request->request->get('fraisWallet'));
+        $globalWallet->setFraisBlockchain($request->request->get('fraisBlockchain'));
 
         $this->em->getConnection()->beginTransaction();
         try {
@@ -265,8 +278,14 @@ class WalletController extends AbstractController
 
         $filename = md5(uniqid()) . '.' . $file->guessClientExtension();
         $file->move($path, $filename);
-        //dd($filename);
         $gasyWallet->setLogo($filename);
+
+        $file = $request->files->get('logoMain');
+        $path = $this->getParameter('kernel.project_dir') . '/public/image/logo';
+
+        $filename = md5(uniqid()) . '.' . $file->guessClientExtension();
+        $file->move($path, $filename);
+        $gasyWallet->setLogoMain($filename);
 
         $this->em->getConnection()->beginTransaction();
         try {
@@ -284,7 +303,8 @@ class WalletController extends AbstractController
         return $this->json([
             'gasyWallet_id' => $gasyWallet->getId(),
             'gasyWallet_name' => $gasyWallet->getGasyWalletName(),
-            'gasyWallet_logo' => $gasyWallet->getLogo()
+            'gasyWallet_logo_main' => $gasyWallet->getLogoMain(),
+            'gasyWallet_logo' => $gasyWallet->getLogo(),
         ]);
     }
 
@@ -548,6 +568,7 @@ class WalletController extends AbstractController
         //$mainWallet = $this->mainWalletRepository->findOneById($id);
         //$globalWallet = $this->globalWalletRepository->findBy(['mainWallet' => $mainWallet]);
         $wallets = $this->globalWalletRepository->findAllWalletByMainWalletId($id);
+
         //dd($wallets);
         foreach ($wallets as $key => $wallet) {
             //dd($wallet['id']);
@@ -1007,13 +1028,53 @@ public function editReserve($id, Request $request): JsonResponse
 
         return $this->json(['done']);
     }
+
     //fixer image wallet
     #[Route('/fixWallet', name: 'app_fix_wallet', methods: 'POST')]
     public function fixWallet(Request $request): JsonResponse
     {
 
         $wallet = $this->walletRepository->findOneBy(['walletName' => $request->request->get('walletName')]);
+
+        //for main logo
+        $filename = $wallet->getLogoMain();
+
+        $file = $request->files->get('logoMain');
+
+        $path = $this->getParameter('kernel.project_dir') . '/public/image/logo';
+
+        $file->move($path, $filename);
+
+        //for sub logo
         $filename = $wallet->getLogo();
+
+        $file = $request->files->get('logo');
+
+        $path = $this->getParameter('kernel.project_dir') . '/public/image/logo';
+
+        $file->move($path, $filename);
+
+        return $this->json(['done']);
+    }
+
+    //fixer image wallet
+    #[Route('/fixGasyWallet', name: 'app_fix_gasy_wallet', methods: 'POST')]
+    public function fixGasyWallet(Request $request): JsonResponse
+    {
+
+        $gasyWallet = $this->gasyWalletRepository->findOneBy(['gasyWalletName' => $request->request->get('gasyWalletName')]);
+
+        //for main logo
+        $filename = $gasyWallet->getLogoMain();
+
+        $file = $request->files->get('logoMain');
+
+        $path = $this->getParameter('kernel.project_dir') . '/public/image/logo';
+
+        $file->move($path, $filename);
+
+        //for sub logo
+        $filename = $gasyWallet->getLogo();
 
         $file = $request->files->get('logo');
 

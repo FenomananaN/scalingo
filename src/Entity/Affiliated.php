@@ -17,13 +17,13 @@ class Affiliated
 
     #[ORM\OneToOne(inversedBy: 'affiliated', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $user = null;
-
-    #[ORM\Column]
-    private ?int $mvx = null;
+    private ?User $users = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $parrainageId = null;
+    private ?string $commision = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $mvxId = null;
 
     #[ORM\OneToMany(mappedBy: 'affiliated', targetEntity: AffiliatedLevel::class)]
     private Collection $affiliatedLevels;
@@ -33,44 +33,43 @@ class Affiliated
         $this->affiliatedLevels = new ArrayCollection();
     }
 
-
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getUsers(): ?User
     {
-        return $this->user;
+        return $this->users;
     }
 
-    public function setUser(User $user): self
+    public function setUsers(User $users): static
     {
-        $this->user = $user;
+        $this->users = $users;
 
         return $this;
     }
 
-    public function getMvx(): ?int
+    public function getCommision(): ?string
     {
-        return $this->mvx;
+        return $this->commision;
     }
 
-    public function setMvx(int $mvx): self
+    public function setCommision(string $commision): static
     {
-        $this->mvx = $mvx;
+        $this->commision = $commision;
 
         return $this;
     }
 
-    public function getParrainageId(): ?string
+    public function getMvxId(): ?string
     {
-        return $this->parrainageId;
+        return $this->mvxId;
     }
 
-    public function setParrainageId(string $parrainageId): self
+    public function setMvxId(string $mvxId): static
     {
-        $this->parrainageId = $parrainageId;
+        $this->mvxId = $mvxId;
 
         return $this;
     }
@@ -83,7 +82,7 @@ class Affiliated
         return $this->affiliatedLevels;
     }
 
-    public function addAffiliatedLevel(AffiliatedLevel $affiliatedLevel): self
+    public function addAffiliatedLevel(AffiliatedLevel $affiliatedLevel): static
     {
         if (!$this->affiliatedLevels->contains($affiliatedLevel)) {
             $this->affiliatedLevels->add($affiliatedLevel);
@@ -93,7 +92,7 @@ class Affiliated
         return $this;
     }
 
-    public function removeAffiliatedLevel(AffiliatedLevel $affiliatedLevel): self
+    public function removeAffiliatedLevel(AffiliatedLevel $affiliatedLevel): static
     {
         if ($this->affiliatedLevels->removeElement($affiliatedLevel)) {
             // set the owning side to null (unless already changed)

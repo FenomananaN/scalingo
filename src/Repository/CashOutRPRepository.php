@@ -21,24 +21,6 @@ class CashOutRPRepository extends ServiceEntityRepository
         parent::__construct($registry, CashOutRP::class);
     }
 
-    public function save(CashOutRP $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->persist($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
-    public function remove(CashOutRP $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->remove($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
 //    /**
 //     * @return CashOutRP[] Returns an array of CashOutRP objects
 //     */

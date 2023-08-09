@@ -14,9 +14,10 @@ class OldPhoneNumber
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'oldPhoneNumbers')]
-    private ?User $user = null;
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $users = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 255)]
     private ?string $phoneNumber = null;
 
     public function getId(): ?int
@@ -24,14 +25,14 @@ class OldPhoneNumber
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getUsers(): ?User
     {
-        return $this->user;
+        return $this->users;
     }
 
-    public function setUser(?User $user): self
+    public function setUsers(?User $users): static
     {
-        $this->user = $user;
+        $this->users = $users;
 
         return $this;
     }
@@ -41,7 +42,7 @@ class OldPhoneNumber
         return $this->phoneNumber;
     }
 
-    public function setPhoneNumber(?string $phoneNumber): self
+    public function setPhoneNumber(string $phoneNumber): static
     {
         $this->phoneNumber = $phoneNumber;
 

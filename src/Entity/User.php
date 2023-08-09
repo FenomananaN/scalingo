@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use App\Repository\UserRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -40,32 +40,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $airtel = null;
 
-    #[ORM\Column]
-    private ?bool $verifiedStatus = null;
+    #[ORM\Column(length: 255)]
+    private ?string $currentRP = null;
 
-    #[ORM\Column]
-    private ?int $fidelityPt = null;
+    #[ORM\Column(nullable: true)]
+    private ?bool $verifiedStatus = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
-
-    #[ORM\Column(type: Types::ARRAY)]
-    private array $roles = [];
-
-    #[ORM\OneToMany(mappedBy: 'user_id', targetEntity: Depot::class)]
-    private Collection $depot;
-
-    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
-    private ?Affiliated $affiliated = null;
-
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: AffiliatedLevel::class)]
-    private Collection $affiliatedLevels;
-
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Retrait::class)]
-    private Collection $retraits;
-
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Transaction::class)]
-    private Collection $transactions;
 
     #[ORM\Column(nullable: true)]
     private ?bool $verificationPending = null;
@@ -73,22 +55,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable: true)]
     private ?bool $verificationFailed = null;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: OldPhoneNumber::class)]
+    #[ORM\OneToOne(mappedBy: 'users', cascade: ['persist', 'remove'])]
+    private ?UserVerifiedInfo $userVerifiedInfo = null;
+
+    #[ORM\OneToOne(mappedBy: 'users', cascade: ['persist', 'remove'])]
+    private ?Affiliated $affiliated = null;
+
+    #[ORM\OneToMany(mappedBy: 'users', targetEntity: AffiliatedLevel::class)]
+    private Collection $affiliatedLevels;
+
+    #[ORM\OneToMany(mappedBy: 'users', targetEntity: OldPhoneNumber::class)]
     private Collection $oldPhoneNumbers;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: CashOutRP::class)]
+    #[ORM\OneToMany(mappedBy: 'users', targetEntity: Transaction::class)]
+    private Collection $transactions;
+
+    #[ORM\OneToMany(mappedBy: 'users', targetEntity: CashOutRP::class)]
     private Collection $cashOutRPs;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $CurrentRP = null;
+    #[ORM\Column(type: Types::ARRAY)]
+    private array $roles = [];
 
     public function __construct()
     {
-        $this->depot = new ArrayCollection();
         $this->affiliatedLevels = new ArrayCollection();
-        $this->retraits = new ArrayCollection();
-        $this->transactions = new ArrayCollection();
         $this->oldPhoneNumbers = new ArrayCollection();
+        $this->transactions = new ArrayCollection();
         $this->cashOutRPs = new ArrayCollection();
     }
 
@@ -102,7 +94,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 
-    public function setEmail(string $email): self
+    public function setEmail(string $email): static
     {
         $this->email = $email;
 
@@ -114,7 +106,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    public function setPassword(string $password): self
+    public function setPassword(string $password): static
     {
         $this->password = $password;
 
@@ -126,7 +118,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->username;
     }
 
-    public function setUsername(string $username): self
+    public function setUsername(string $username): static
     {
         $this->username = $username;
 
@@ -138,7 +130,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->fullname;
     }
 
-    public function setFullname(?string $fullname): self
+    public function setFullname(?string $fullname): static
     {
         $this->fullname = $fullname;
 
@@ -150,7 +142,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->telma;
     }
 
-    public function setTelma(?string $telma): self
+    public function setTelma(?string $telma): static
     {
         $this->telma = $telma;
 
@@ -162,7 +154,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->orange;
     }
 
-    public function setOrange(?string $orange): self
+    public function setOrange(?string $orange): static
     {
         $this->orange = $orange;
 
@@ -174,9 +166,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->airtel;
     }
 
-    public function setAirtel(?string $airtel): self
+    public function setAirtel(?string $airtel): static
     {
         $this->airtel = $airtel;
+
+        return $this;
+    }
+
+    public function getCurrentRP(): ?string
+    {
+        return $this->currentRP;
+    }
+
+    public function setCurrentRP(string $currentRP): static
+    {
+        $this->currentRP = $currentRP;
 
         return $this;
     }
@@ -186,21 +190,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->verifiedStatus;
     }
 
-    public function setVerifiedStatus(bool $verifiedStatus): self
+    public function setVerifiedStatus(?bool $verifiedStatus): static
     {
         $this->verifiedStatus = $verifiedStatus;
-
-        return $this;
-    }
-
-    public function getFidelityPt(): ?int
-    {
-        return $this->fidelityPt;
-    }
-
-    public function setFidelityPt(int $fidelityPt): self
-    {
-        $this->fidelityPt = $fidelityPt;
 
         return $this;
     }
@@ -210,40 +202,50 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
     {
         $this->createdAt = $createdAt;
 
         return $this;
     }
 
-
-    /**
-     * @return Collection<int, Depot>
-     */
-    public function getDepot(): Collection
+    public function isVerificationPending(): ?bool
     {
-        return $this->depot;
+        return $this->verificationPending;
     }
 
-    public function addDepot(Depot $depot): self
+    public function setVerificationPending(?bool $verificationPending): static
     {
-        if (!$this->depot->contains($depot)) {
-            $this->depot->add($depot);
-            $depot->setUser($this);
-        }
+        $this->verificationPending = $verificationPending;
 
         return $this;
     }
 
-    public function removeDepot(Depot $depot): self
+    public function isVerificationFailed(): ?bool
     {
-        if ($this->depot->removeElement($depot)) {
-            // set the owning side to null (unless already changed)
-            if ($depot->getUser() === $this) {
-                $depot->setUser(null);
-            }
+        return $this->verificationFailed;
+    }
+
+    public function setVerificationFailed(?bool $verificationFailed): static
+    {
+        $this->verificationFailed = $verificationFailed;
+
+        return $this;
+    }
+
+    public function getUserVerifiedInfo(): ?UserVerifiedInfo
+    {
+        return $this->userVerifiedInfo;
+    }
+
+    public function setUserVerifiedInfo(UserVerifiedInfo $userVerifiedInfo): static
+    {
+        // set the owning side of the relation if necessary
+        if ($userVerifiedInfo->getUsers() !== $this) {
+            $userVerifiedInfo->setUsers($this);
         }
+
+        $this->userVerifiedInfo = $userVerifiedInfo;
 
         return $this;
     }
@@ -253,11 +255,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->affiliated;
     }
 
-    public function setAffiliated(Affiliated $affiliated): self
+    public function setAffiliated(Affiliated $affiliated): static
     {
         // set the owning side of the relation if necessary
-        if ($affiliated->getUser() !== $this) {
-            $affiliated->setUser($this);
+        if ($affiliated->getUsers() !== $this) {
+            $affiliated->setUsers($this);
         }
 
         $this->affiliated = $affiliated;
@@ -273,28 +275,117 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->affiliatedLevels;
     }
 
-    public function addAffiliatedLevel(AffiliatedLevel $affiliatedLevel): self
+    public function addAffiliatedLevel(AffiliatedLevel $affiliatedLevel): static
     {
         if (!$this->affiliatedLevels->contains($affiliatedLevel)) {
             $this->affiliatedLevels->add($affiliatedLevel);
-            $affiliatedLevel->setUser($this);
+            $affiliatedLevel->setUsers($this);
         }
 
         return $this;
     }
 
-    public function removeAffiliatedLevel(AffiliatedLevel $affiliatedLevel): self
+    public function removeAffiliatedLevel(AffiliatedLevel $affiliatedLevel): static
     {
         if ($this->affiliatedLevels->removeElement($affiliatedLevel)) {
             // set the owning side to null (unless already changed)
-            if ($affiliatedLevel->getUser() === $this) {
-                $affiliatedLevel->setUser(null);
+            if ($affiliatedLevel->getUsers() === $this) {
+                $affiliatedLevel->setUsers(null);
             }
         }
 
         return $this;
     }
 
+    /**
+     * @return Collection<int, OldPhoneNumber>
+     */
+    public function getOldPhoneNumbers(): Collection
+    {
+        return $this->oldPhoneNumbers;
+    }
+
+    public function addOldPhoneNumber(OldPhoneNumber $oldPhoneNumber): static
+    {
+        if (!$this->oldPhoneNumbers->contains($oldPhoneNumber)) {
+            $this->oldPhoneNumbers->add($oldPhoneNumber);
+            $oldPhoneNumber->setUsers($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOldPhoneNumber(OldPhoneNumber $oldPhoneNumber): static
+    {
+        if ($this->oldPhoneNumbers->removeElement($oldPhoneNumber)) {
+            // set the owning side to null (unless already changed)
+            if ($oldPhoneNumber->getUsers() === $this) {
+                $oldPhoneNumber->setUsers(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Transaction>
+     */
+    public function getTransactions(): Collection
+    {
+        return $this->transactions;
+    }
+
+    public function addTransaction(Transaction $transaction): static
+    {
+        if (!$this->transactions->contains($transaction)) {
+            $this->transactions->add($transaction);
+            $transaction->setUsers($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTransaction(Transaction $transaction): static
+    {
+        if ($this->transactions->removeElement($transaction)) {
+            // set the owning side to null (unless already changed)
+            if ($transaction->getUsers() === $this) {
+                $transaction->setUsers(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CashOutRP>
+     */
+    public function getCashOutRPs(): Collection
+    {
+        return $this->cashOutRPs;
+    }
+
+    public function addCashOutRP(CashOutRP $cashOutRP): static
+    {
+        if (!$this->cashOutRPs->contains($cashOutRP)) {
+            $this->cashOutRPs->add($cashOutRP);
+            $cashOutRP->setUsers($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCashOutRP(CashOutRP $cashOutRP): static
+    {
+        if ($this->cashOutRPs->removeElement($cashOutRP)) {
+            // set the owning side to null (unless already changed)
+            if ($cashOutRP->getUsers() === $this) {
+                $cashOutRP->setUsers(null);
+            }
+        }
+
+        return $this;
+    }
     //
     /**
      * A visual identifier that represents this user.
@@ -341,161 +432,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
-    }
-
-    /**
-     * @return Collection<int, Retrait>
-     */
-    public function getRetraits(): Collection
-    {
-        return $this->retraits;
-    }
-
-    public function addRetrait(Retrait $retrait): self
-    {
-        if (!$this->retraits->contains($retrait)) {
-            $this->retraits->add($retrait);
-            $retrait->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeRetrait(Retrait $retrait): self
-    {
-        if ($this->retraits->removeElement($retrait)) {
-            // set the owning side to null (unless already changed)
-            if ($retrait->getUser() === $this) {
-                $retrait->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Transaction>
-     */
-    public function getTransactions(): Collection
-    {
-        return $this->transactions;
-    }
-
-    public function addTransaction(Transaction $transaction): self
-    {
-        if (!$this->transactions->contains($transaction)) {
-            $this->transactions->add($transaction);
-            $transaction->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeTransaction(Transaction $transaction): self
-    {
-        if ($this->transactions->removeElement($transaction)) {
-            // set the owning side to null (unless already changed)
-            if ($transaction->getUser() === $this) {
-                $transaction->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function isVerificationPending(): ?bool
-    {
-        return $this->verificationPending;
-    }
-
-    public function setVerificationPending(?bool $verificationPending): self
-    {
-        $this->verificationPending = $verificationPending;
-
-        return $this;
-    }
-
-    public function isVerificationFailed(): ?bool
-    {
-        return $this->verificationFailed;
-    }
-
-    public function setVerificationFailed(?bool $verificationFailed): self
-    {
-        $this->verificationFailed = $verificationFailed;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, OldPhoneNumber>
-     */
-    public function getOldPhoneNumbers(): Collection
-    {
-        return $this->oldPhoneNumbers;
-    }
-
-    public function addOldPhoneNumber(OldPhoneNumber $oldPhoneNumber): self
-    {
-        if (!$this->oldPhoneNumbers->contains($oldPhoneNumber)) {
-            $this->oldPhoneNumbers->add($oldPhoneNumber);
-            $oldPhoneNumber->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeOldPhoneNumber(OldPhoneNumber $oldPhoneNumber): self
-    {
-        if ($this->oldPhoneNumbers->removeElement($oldPhoneNumber)) {
-            // set the owning side to null (unless already changed)
-            if ($oldPhoneNumber->getUser() === $this) {
-                $oldPhoneNumber->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, CashOutRP>
-     */
-    public function getCashOutRPs(): Collection
-    {
-        return $this->cashOutRPs;
-    }
-
-    public function addCashOutRP(CashOutRP $cashOutRP): self
-    {
-        if (!$this->cashOutRPs->contains($cashOutRP)) {
-            $this->cashOutRPs->add($cashOutRP);
-            $cashOutRP->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCashOutRP(CashOutRP $cashOutRP): self
-    {
-        if ($this->cashOutRPs->removeElement($cashOutRP)) {
-            // set the owning side to null (unless already changed)
-            if ($cashOutRP->getUser() === $this) {
-                $cashOutRP->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function getCurrentRP(): ?string
-    {
-        return $this->CurrentRP;
-    }
-
-    public function setCurrentRP(?string $CurrentRP): self
-    {
-        $this->CurrentRP = $CurrentRP;
-
-        return $this;
     }
 }

@@ -20,34 +20,17 @@ class DepotCoursRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, DepotCours::class);
     }
-
+    
     public function findCoursByWalletId(int $id)
     {
         return $this->createQueryBuilder('d')
-            ->andWhere('d.Wallet = :id')
+            ->andWhere('d.wallet = :id')
             ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult()
         ;
     }
 
-    public function save(DepotCours $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->persist($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
-    public function remove(DepotCours $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->remove($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
 
 //    /**
 //     * @return DepotCours[] Returns an array of DepotCours objects

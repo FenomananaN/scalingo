@@ -24,22 +24,19 @@ class Wallet
     #[ORM\Column(length: 255)]
     private ?string $logo = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $logoMain = null;
+
     #[ORM\OneToMany(mappedBy: 'wallet', targetEntity: GlobalWallet::class)]
     private Collection $globalWallets;
 
-    #[ORM\OneToOne(mappedBy: 'Wallet', cascade: ['persist', 'remove'])]
-    private ?DepotCours $depotCours = null;
-
-    #[ORM\OneToOne(mappedBy: 'Wallet', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'wallet', cascade: ['persist', 'remove'])]
     private ?RetraitCours $retraitCours = null;
-
 
     public function __construct()
     {
         $this->globalWallets = new ArrayCollection();
-        
     }
-
 
     public function getId(): ?int
     {
@@ -51,20 +48,19 @@ class Wallet
         return $this->walletName;
     }
 
-    public function setWalletName(string $walletName): self
+    public function setWalletName(string $walletName): static
     {
         $this->walletName = $walletName;
 
         return $this;
     }
 
-
     public function getCurrency(): ?string
     {
         return $this->currency;
     }
 
-    public function setCurrency(string $currency): self
+    public function setCurrency(string $currency): static
     {
         $this->currency = $currency;
 
@@ -76,9 +72,21 @@ class Wallet
         return $this->logo;
     }
 
-    public function setLogo(string $logo): self
+    public function setLogo(string $logo): static
     {
         $this->logo = $logo;
+
+        return $this;
+    }
+
+    public function getLogoMain(): ?string
+    {
+        return $this->logoMain;
+    }
+
+    public function setLogoMain(string $logoMain): static
+    {
+        $this->logoMain = $logoMain;
 
         return $this;
     }
@@ -91,7 +99,7 @@ class Wallet
         return $this->globalWallets;
     }
 
-    public function addGlobalWallet(GlobalWallet $globalWallet): self
+    public function addGlobalWallet(GlobalWallet $globalWallet): static
     {
         if (!$this->globalWallets->contains($globalWallet)) {
             $this->globalWallets->add($globalWallet);
@@ -101,7 +109,7 @@ class Wallet
         return $this;
     }
 
-    public function removeGlobalWallet(GlobalWallet $globalWallet): self
+    public function removeGlobalWallet(GlobalWallet $globalWallet): static
     {
         if ($this->globalWallets->removeElement($globalWallet)) {
             // set the owning side to null (unless already changed)
@@ -113,29 +121,12 @@ class Wallet
         return $this;
     }
 
-    public function getDepotCours(): ?DepotCours
-    {
-        return $this->depotCours;
-    }
-
-    public function setDepotCours(DepotCours $depotCours): self
-    {
-        // set the owning side of the relation if necessary
-        if ($depotCours->getWallet() !== $this) {
-            $depotCours->setWallet($this);
-        }
-
-        $this->depotCours = $depotCours;
-
-        return $this;
-    }
-
     public function getRetraitCours(): ?RetraitCours
     {
         return $this->retraitCours;
     }
 
-    public function setRetraitCours(RetraitCours $retraitCours): self
+    public function setRetraitCours(RetraitCours $retraitCours): static
     {
         // set the owning side of the relation if necessary
         if ($retraitCours->getWallet() !== $this) {

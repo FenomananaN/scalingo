@@ -82,7 +82,7 @@ class UserController extends AbstractController
             'createdAt' => $user->getCreatedAt(),
             'isVerified' => $user->isVerifiedStatus(),
             'currentRP' => $user->getCurrentRP(),
-            'parrainageId' => $user->getAffiliated()->getParrainageId(),
+            'mvxId' => $user->getAffiliated()->getMvxId(),
             'roles' => $user->getRoles()
         ]);
     }
@@ -93,7 +93,7 @@ class UserController extends AbstractController
 
         //misi erreur ni vs code
         $user = $this->getUser();
-        $affiliated=$this->affiliatedRepository->findOneByUser($user);
+        $affiliated=$this->affiliatedRepository->findOneByUsers($user);
 
         return $this->json([
             'id' => $user->getId(),
@@ -108,8 +108,8 @@ class UserController extends AbstractController
            //'fidelityPt' => $user->getFidelityPt(),
             'isVerified' => $user->isVerifiedStatus(),
             'isVerificationPending'=>$user->isVerificationPending(),
-            'parrainageId' => $affiliated->getParrainageId(),
-            'mvx'=>$affiliated->getMvx()
+            'mvxId' => $affiliated->getMvxId(),
+            'commision'=>$affiliated->getCommision()
         ]);
     }
 
@@ -229,8 +229,8 @@ class UserController extends AbstractController
             'createdAt' => $user->getCreatedAt(),
             'isVerified' => $user->isVerifiedStatus(),
             'isVerificationPending'=>$user->isVerificationPending(),
-            'parrainageId' => $affiliated->getParrainageId(),
-            'mvx'=>$affiliated->getMvx()
+            'mvxId' => $affiliated->getMvxId(),
+            'commision'=>$affiliated->getCommision()
         ]);
     }
 
@@ -244,8 +244,8 @@ class UserController extends AbstractController
         $commission = array();
 
         foreach($_commission as $key => $com){
-            $commission[$key]['manavolaId']=$com->getUser()->getAffiliated()->getParrainageId();
-            $commission[$key]['username']=$com->getUser()->getUsername();
+            $commission[$key]['manavolaId']=$com->getUsers()->getAffiliated()->getMvxId();
+            $commission[$key]['username']=$com->getUsers()->getUsername();
         }
         return $this->json($commission);
     }
@@ -261,8 +261,8 @@ class UserController extends AbstractController
         $commission = array();
 
         foreach($_commission as $key => $com){
-            $commission[$key]['manavolaId']=$com->getUser()->getAffiliated()->getParrainageId();
-            $commission[$key]['username']=$com->getUser()->getUsername();
+            $commission[$key]['manavolaId']=$com->getUsers()->getAffiliated()->getMvxId();
+            $commission[$key]['username']=$com->getUsers()->getUsername();
         }
         return $this->json($commission);
     }
@@ -277,7 +277,7 @@ class UserController extends AbstractController
 
         foreach($_users as $key=>$user){
             $users[$key]['id']=$user->getId();
-            $users[$key]['mvxId']=$user->getAffiliated()->getParrainageId();
+            $users[$key]['mvxId']=$user->getAffiliated()->getMvxId();
             $users[$key]['email']=$user->getEmail();
             $users[$key]['username']=$user->getUsername();
             $users[$key]['verificationPending']=$user->isverificationPending();
@@ -297,7 +297,7 @@ class UserController extends AbstractController
 
         foreach($_users as $key=>$user){
             $users[$key]['id']=$user->getId();
-            $users[$key]['mvxId']=$user->getAffiliated()->getParrainageId();
+            $users[$key]['mvxId']=$user->getAffiliated()->getMvxId();
             $users[$key]['email']=$user->getEmail();
             $users[$key]['username']=$user->getUsername();
         }
@@ -314,7 +314,7 @@ class UserController extends AbstractController
 
         foreach($_users as $key=>$user){
             $users[$key]['id']=$user->getId();
-            $users[$key]['mvxId']=$user->getAffiliated()->getParrainageId();
+            $users[$key]['mvxId']=$user->getAffiliated()->getMvxId();
             $users[$key]['email']=$user->getEmail();
             $users[$key]['username']=$user->getUsername();
         }
@@ -331,7 +331,7 @@ class UserController extends AbstractController
 
         foreach($_users as $key=>$user){
             $users[$key]['id']=$user->getId();
-            $users[$key]['mvxId']=$user->getAffiliated()->getParrainageId();
+            $users[$key]['mvxId']=$user->getAffiliated()->getMvxId();
             $users[$key]['email']=$user->getEmail();
             $users[$key]['username']=$user->getUsername();
         }
@@ -349,7 +349,7 @@ class UserController extends AbstractController
             return $this->json(['error'=>'not found for userId='.$id],404);
         }
 
-        $userVerificationInfo= $this->userVerifiedInfoRepository->findOneByUser($user);
+        $userVerificationInfo= $this->userVerifiedInfoRepository->findOneByUsers($user);
         //dd($user);
 
         if(!$userVerificationInfo){
@@ -358,7 +358,7 @@ class UserController extends AbstractController
         //rectophoto versoPhoto selfieAvecCIN numeroCIN
         $users= array();
             $users['id']=$user->getId();
-            $users['mvxId']=$user->getAffiliated()->getParrainageId();
+            $users['mvxId']=$user->getAffiliated()->getMvxId();
             $users['email']=$user->getEmail();
             $users['username']=$user->getUsername();
             $users['fullname']=$user->getFullname();
@@ -452,7 +452,7 @@ class UserController extends AbstractController
             'airtel' => $user->getAirtel(),
             'createdAt' => $user->getCreatedAt(),
             'isVerified' => $user->isVerifiedStatus(),
-            'parrainageId' => $user->getAffiliated()->getParrainageId(),
+            'mvxId' => $user->getAffiliated()->getMvxId(),
             'roles' => $user->getRoles()
         ]);
     }

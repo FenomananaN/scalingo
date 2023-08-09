@@ -7,28 +7,21 @@
         "php": ">=8.1",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "doctrine/doctrine-bundle": "^2.9",
+        "doctrine/doctrine-bundle": "^2.10",
         "doctrine/doctrine-migrations-bundle": "^3.2",
-        "doctrine/orm": "^2.14",
-        "friendsofsymfony/rest-bundle": "^3.5",
-        "jms/serializer-bundle": "^5.3",
+        "doctrine/orm": "^2.16",
         "lexik/jwt-authentication-bundle": "^2.18",
         "nelmio/cors-bundle": "^2.3",
-        "symfony/console": "6.2.*",
-        "symfony/dotenv": "6.2.*",
+        "symfony/console": "6.3.*",
+        "symfony/dotenv": "6.3.*",
         "symfony/flex": "^2",
-        "symfony/framework-bundle": "6.2.*",
-        "symfony/mime": "6.2.*",
-        "symfony/runtime": "6.2.*",
-        "symfony/security-bundle": "6.2.*",
-        "symfony/twig-bundle": "6.2.*",
-        "symfony/yaml": "6.2.*",
-        "zircote/swagger-php": "^4.7"
+        "symfony/framework-bundle": "6.3.*",
+        "symfony/mime": "6.3.*",
+        "symfony/runtime": "6.3.*",
+        "symfony/yaml": "6.3.*"
     },
     "require-dev": {
-        "symfony/maker-bundle": "^1.48",
-        "symfony/stopwatch": "6.2.*",
-        "symfony/web-profiler-bundle": "6.2.*"
+        "symfony/maker-bundle": "^1.50"
     },
     "config": {
         "allow-plugins": {
@@ -76,7 +69,7 @@
     "extra": {
         "symfony": {
             "allow-contrib": false,
-            "require": "6.2.*"
+            "require": "6.3.*"
         }
     }
 }

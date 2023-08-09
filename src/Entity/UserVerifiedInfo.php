@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserVerifiedInfoRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserVerifiedInfoRepository::class)]
@@ -13,15 +14,12 @@ class UserVerifiedInfo
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'userVerifiedInfo', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $user = null;
+    private ?User $users = null;
 
     #[ORM\Column(length: 255)]
     private ?string $numeroCIN = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $rectophoto = null;
 
     #[ORM\Column(length: 255)]
     private ?string $versoPhoto = null;
@@ -29,23 +27,25 @@ class UserVerifiedInfo
     #[ORM\Column(length: 255)]
     private ?string $selfieAvecCIN = null;
 
-    #[ORM\Column( nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $verifiedAt = null;
 
- 
+    #[ORM\Column(length: 255)]
+    private ?string $rectoPhoto = null;
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getUsers(): ?User
     {
-        return $this->user;
+        return $this->users;
     }
 
-    public function setUser(User $user): self
+    public function setUsers(User $users): static
     {
-        $this->user = $user;
+        $this->users = $users;
 
         return $this;
     }
@@ -55,21 +55,9 @@ class UserVerifiedInfo
         return $this->numeroCIN;
     }
 
-    public function setNumeroCIN(string $numeroCIN): self
+    public function setNumeroCIN(string $numeroCIN): static
     {
         $this->numeroCIN = $numeroCIN;
-
-        return $this;
-    }
-
-    public function getRectophoto(): ?string
-    {
-        return $this->rectophoto;
-    }
-
-    public function setRectophoto(string $rectophoto): self
-    {
-        $this->rectophoto = $rectophoto;
 
         return $this;
     }
@@ -79,7 +67,7 @@ class UserVerifiedInfo
         return $this->versoPhoto;
     }
 
-    public function setVersoPhoto(string $versoPhoto): self
+    public function setVersoPhoto(string $versoPhoto): static
     {
         $this->versoPhoto = $versoPhoto;
 
@@ -91,7 +79,7 @@ class UserVerifiedInfo
         return $this->selfieAvecCIN;
     }
 
-    public function setSelfieAvecCIN(string $selfieAvecCIN): self
+    public function setSelfieAvecCIN(string $selfieAvecCIN): static
     {
         $this->selfieAvecCIN = $selfieAvecCIN;
 
@@ -103,12 +91,22 @@ class UserVerifiedInfo
         return $this->verifiedAt;
     }
 
-    public function setVerifiedAt(\DateTimeInterface $verifiedAt): self
+    public function setVerifiedAt(\DateTimeInterface $verifiedAt): static
     {
         $this->verifiedAt = $verifiedAt;
 
         return $this;
     }
 
+    public function getRectoPhoto(): ?string
+    {
+        return $this->rectoPhoto;
+    }
 
+    public function setRectoPhoto(string $rectoPhoto): static
+    {
+        $this->rectoPhoto = $rectoPhoto;
+
+        return $this;
+    }
 }

@@ -21,24 +21,6 @@ class UserVerifiedInfoRepository extends ServiceEntityRepository
         parent::__construct($registry, UserVerifiedInfo::class);
     }
 
-    public function save(UserVerifiedInfo $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->persist($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
-    public function remove(UserVerifiedInfo $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->remove($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
 //    /**
 //     * @return UserVerifiedInfo[] Returns an array of UserVerifiedInfo objects
 //     */
