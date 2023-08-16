@@ -37,7 +37,7 @@ class TransactionController extends AbstractController
         $this->rPUtils=$rPUtils;
     }
 //depot    
-    #[Route('/depot', name: 'app_depot', methods: 'POST')]
+    #[Route('/api/depot', name: 'app_depot', methods: 'POST')]
     public function index(Request $request): JsonResponse
     {
         $user = $this->getUser();
@@ -47,6 +47,14 @@ class TransactionController extends AbstractController
             if (!$user) {
                 return $this->json(['message' => 'Veuillez entrer un numero valide'], 401);
             }
+        } else {    
+            $user = $this->userRepository->findOneById($user->getId());
+        }
+
+
+        //look if the user is already verified
+        if(!$user->isVerifiedStatus()){
+            return $this->json(['message'=>"Votre compte n'est pas verifier"],401);
         }
 
         //get wallet type
@@ -155,18 +163,20 @@ class TransactionController extends AbstractController
 //end depot
 
 //start retrait
-#[Route('/retrait', name: 'app_retrait', methods:'POST')]
+#[Route('/api/retrait', name: 'app_retrait', methods:'POST')]
     public function retrait(Request $request): JsonResponse
     {//id,user,gasyWallet,globalWallet,soldeDemmande,totalToReceive,cours,policyAgreement,beingProcessed,verified,transacDone:
 
         $retrait = new Transaction();
 
-        $user=$this->getUser();
+        $user=$this->getUser();  
         if (!$user) {
             $user = $this->userRepository->findOneByEmail($request->request->get('numero'));
             if (!$user) {
                 return $this->json(['message' => 'Veuillez entrer un numero valide'], 401);
             }
+        } else{ 
+            $user = $this->userRepository->findOneById($user->getId());
         }
 
         $retrait->setUsers($user);
@@ -237,7 +247,7 @@ class TransactionController extends AbstractController
             'currency' => $retrait->getGlobalWallet()->getWallet()->getCurrency(),
         ]);
     }
-    #[Route('/retrait/addtransactionId', name: 'app_retrait_transac', methods:'POST')]
+    #[Route('/api/retrait/addtransactionId', name: 'app_retrait_transac', methods:'POST')]
     public function retraitTransac(Request $request): JsonResponse
     {//id,user,gasyWallet,globalWallet,soldeDemmande,totalToReceive,cours,policyAgreement,beingProcessed,verified,transacDone:
         $retrait=$this->transactionRepository->findOneById($request->request->get('retrait_id'));
@@ -270,7 +280,7 @@ class TransactionController extends AbstractController
     #[Route('/api/getRecentTransaction', name: 'app_get_recent_transaction', methods:'GET')]
     public function getRecentTransaction(Request $request): JsonResponse
     {
-       // $user=$this->getUser();
+        //efa mis id
 
         $_transaction=$this->transactionRepository->findRecentTransactionByUser($this->getUser()->getId());
         

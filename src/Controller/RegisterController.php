@@ -239,6 +239,8 @@ class RegisterController extends AbstractController
     public function verificationRegister(Request $request): JsonResponse
     {
         $user = $this->getUser();
+        $user = $this->userRepository->findOneById($user->getId());
+
         if (!$user) {
             $user = $this->userRepository->findOneByEmail($request->request->get('email'));
         }
@@ -303,6 +305,8 @@ class RegisterController extends AbstractController
     public function validate(Request $request): JsonResponse
     {
         $user = $this->getUser();
+        $user = $this->userRepository->findOneById($user->getId());
+        
         if (!$user) {
             $user = $this->userRepository->findOneByEmail($request->request->get('email'));
         }

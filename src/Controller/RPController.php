@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\CashOutRP;
 use App\Entity\RPManager;
+use App\Repository\CashOutRPRepository;
 use App\Repository\UserRepository;
 use App\Repository\RPManagerRepository;
 use App\Service\RPUtils;
@@ -19,14 +20,16 @@ class RPController extends AbstractController
     private $em;
     private $userRepository;
     private $rpManagerRepository;
+    private $cashOutRPRepository;
     private $rPUtils;
 
-    public function __construct(EntityManagerInterface $em, UserRepository $userRepository, RPManagerRepository $rpManagerRepository, RPUtils $rPUtils)
+    public function __construct(EntityManagerInterface $em, UserRepository $userRepository, RPManagerRepository $rpManagerRepository, RPUtils $rPUtils, CashOutRPRepository $cashOutRPRepository)
     {
         $this->em = $em;
         $this->userRepository = $userRepository;
         $this->rpManagerRepository=$rpManagerRepository;
         $this->rPUtils=$rPUtils;
+        $this->cashOutRPRepository=$cashOutRPRepository;
 
     }
     //admin 
@@ -103,12 +106,14 @@ class RPController extends AbstractController
         ]);
     }
 
-    #[Route('/rpcashout', name: 'app_r_p')]
+    #[Route('/api/rpcashout', name: 'app_r_p', methods: 'POST')]
     public function index(Request $request): JsonResponse
     {
         $cashOUtRP= new CashOutRP();
 
         $user=$this->getUser();
+        $user = $this->userRepository->findOneById($user->getId());
+        
         $cashOUtRP->setUsers($user);
 
         //new CurrentRP for User
@@ -119,6 +124,8 @@ class RPController extends AbstractController
         $cashOUtRP->setMGAValue($request->request->get('MGAValue'));
         
         $cashOUtRP->setPhoneNumber($request->request->get('phoneNumber'));
+        $cashOUtRP->setBeingProcessed(true);
+        $cashOUtRP->setVerified(false);
         $cashOUtRP->setCashoutAt(new \DateTime());
         
         //methode hi enregistrena azy amn ni base
@@ -138,5 +145,32 @@ class RPController extends AbstractController
         return $this->json([
             'status' => 'ok',
         ]);
+    }
+
+    //get cash out
+    #[Route('/api/getrpcashoutbyuser', name: 'app_get_r_p_user', methods: 'GET')]
+    public function getRpCashOutByUser(Request $request): JsonResponse
+    {
+        $user=$this->getUser();
+        $user = $this->userRepository->findOneById($user->getId());
+
+        $_cashOutRP=$this->cashOutRPRepository->findByUsers($user);
+        
+        $cashOUtRP= array();
+        foreach ($_cashOutRP as $key => $cashOUt) {
+            $cashOUtRP[$key]['transactionType'] = 'cashOut';
+            $cashOUtRP[$key]['RP'] = $cashOUt->getRP();
+            $cashOUtRP[$key]['RPRate'] = $cashOUt->getRPRate();
+            $cashOUtRP[$key]['MGAValue'] = $cashOUt->getMGAValue();
+            $cashOUtRP[$key]['phoneNumber'] = $cashOUt->getPhoneNumber();
+            $cashOUtRP[$key]['name'] = $cashOUt->getName();
+            $cashOUtRP[$key]['beingProcessed'] = $cashOUt->isBeingProcessed();
+            $cashOUtRP[$key]['verified'] = $cashOUt->isVerified();
+            $cashOUtRP[$key]['cashoutSuccessed'] = $cashOUt->isCashoutSuccessed();
+            $cashOUtRP[$key]['cashoutFailed'] = $cashOUt->isCashoutFailed();
+            $cashOUtRP[$key]['date'] = $cashOUt->getCashoutAt();
+            //$cashOUtRP[$key][''] = $cashOUt->get();
+        }
+        return $this->json($cashOUtRP);
     }
 }

@@ -14,6 +14,7 @@ use App\Repository\UserVerifiedInfoRepository;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 
 class UserController extends AbstractController
 {  
@@ -22,9 +23,10 @@ class UserController extends AbstractController
     private $affiliatedRepository;
     private $affiliatedLevelRepository;
     private $userVerifiedInfoRepository;
+    private $security;
     //private $depotRepository;
 
-    public  function __construct(UserRepository $userRepository/*, DepotRepository $depotRepository*/,EntityManagerInterface $em, AffiliatedRepository $affiliatedRepository, AffiliatedLevelRepository $affiliatedLevelRepository, UserVerifiedInfoRepository $userVerifiedInfoRepository)
+    public  function __construct(UserRepository $userRepository/*, DepotRepository $depotRepository*/,EntityManagerInterface $em, AffiliatedRepository $affiliatedRepository, AffiliatedLevelRepository $affiliatedLevelRepository, UserVerifiedInfoRepository $userVerifiedInfoRepository,Security $security)
     {
         $this->userRepository = $userRepository;
       //  $this->depotRepository=$depotRepository;
@@ -32,6 +34,7 @@ class UserController extends AbstractController
         $this->affiliatedLevelRepository=$affiliatedLevelRepository;
         $this->userVerifiedInfoRepository=$userVerifiedInfoRepository;
         $this->em = $em;
+        $this->security= $security;
     }
 
     #[OA\Get(path: "/user", description: 'get user logged info', tags: ['User'])]
@@ -62,7 +65,8 @@ class UserController extends AbstractController
     #[Route('/api/user', name: 'app_user')]
     public function getCurrentuser(): JsonResponse
     {
-        $user = $this->getUser();
+        $user = $this->security->getUser();
+       // dd($user);
         
         /*if (!$user) {
             return $this->json(['message' => 'not connected'], 401);
@@ -73,16 +77,7 @@ class UserController extends AbstractController
 
         return $this->json([
             'id' => $user->getId(),
-            'email' => $user->getEmail(),
             'username' => $user->getUsername(),
-            'fullname' => $user->getFullname(),
-            'telma' => $user->getTelma(),
-            'orange' => $user->getOrange(),
-            'airtel' => $user->getAirtel(),
-            'createdAt' => $user->getCreatedAt(),
-            'isVerified' => $user->isVerifiedStatus(),
-            'currentRP' => $user->getCurrentRP(),
-            'mvxId' => $user->getAffiliated()->getMvxId(),
             'roles' => $user->getRoles()
         ]);
     }
@@ -93,19 +88,20 @@ class UserController extends AbstractController
 
         //misi erreur ni vs code
         $user = $this->getUser();
+        $user = $this->userRepository->findOneById($user->getId());
+
         $affiliated=$this->affiliatedRepository->findOneByUsers($user);
 
         return $this->json([
             'id' => $user->getId(),
-          //  'email' => $user->getEmail(),
-           // 'username' => $user->getUsername(),
-           // 'fullname' => $user->getFullname(),
+            'email' => $user->getEmail(),
+            'username' => $user->getUsername(),
+            'fullname' => $user->getFullname(),
             'telma' => $user->getTelma(),
             'orange' => $user->getOrange(),
             'airtel' => $user->getAirtel(),
             'createdAt' => $user->getCreatedAt(), 
             'currentRP' => $user->getCurrentRP(),
-           //'fidelityPt' => $user->getFidelityPt(),
             'isVerified' => $user->isVerifiedStatus(),
             'isVerificationPending'=>$user->isVerificationPending(),
             'mvxId' => $affiliated->getMvxId(),
@@ -118,6 +114,9 @@ class UserController extends AbstractController
     public function editCurrentUser(Request $request): JsonResponse
     {
         $user = $this->getUser();
+
+        //tsy manin na tss fa mbl asina aloa
+        $user = $this->userRepository->findOneById($user->getId());
 
         $user->setEmail($request->request->get('email',$user->getEmail()));
         $user->setUsername($request->request->get('username',$user->getUsername()));
@@ -161,6 +160,8 @@ class UserController extends AbstractController
     public function editCurrentUserNumberOrAdd(Request $request): JsonResponse
     {
         $user = $this->getUser();
+        $user = $this->userRepository->findOneById($user->getId());
+
         $phoneNumber=$request->request->get('number');
         
        // return $this->json($user->getUsername(),403);
@@ -208,13 +209,16 @@ class UserController extends AbstractController
         return $this->json(['hgh']);
     }*/
 
+    //tsy ilaina
     
-    #[Route('/api/setting', name: 'app_setting', methods:'GET')]
+   /* #[Route('/api/setting', name: 'app_setting', methods:'GET')]
     public function getSetting(): JsonResponse
     {
 
         //misi erreur ni vs code
         $user = $this->getUser();
+        //afak tsy mandalo
+        $user = $this->userRepository->findOneById($user->getId());
 
         $affiliated=$this->affiliatedRepository->findOneByUser($user);
 
@@ -233,12 +237,15 @@ class UserController extends AbstractController
             'commision'=>$affiliated->getCommision()
         ]);
     }
-
+*/
     //user
     #[Route('/api/commission', name: 'app_commission', methods:'GET')]
     public function getCommission(): JsonResponse
     {
-        $_commission=$this->affiliatedLevelRepository->findByAffiliated($this->getUser()->getAffiliated());
+        $user=$this->getUser();
+        $user = $this->userRepository->findOneById($user->getId());
+
+        $_commission=$this->affiliatedLevelRepository->findByAffiliated($user->getAffiliated());
         
 
         $commission = array();
