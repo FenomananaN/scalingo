@@ -106,6 +106,7 @@ class RPController extends AbstractController
         ]);
     }
 
+    //user
     #[Route('/api/rpcashout', name: 'app_r_p', methods: 'POST')]
     public function index(Request $request): JsonResponse
     {
@@ -116,8 +117,6 @@ class RPController extends AbstractController
         
         $cashOUtRP->setUsers($user);
 
-        //new CurrentRP for User
-        $user->setCurrentRP($user->getCurrentRP()-$request->request->get('RP'));
 
         $cashOUtRP->setRP($request->request->get('RP'));
         $cashOUtRP->setRPRate($request->request->get('RPRate'));
@@ -126,6 +125,8 @@ class RPController extends AbstractController
         $cashOUtRP->setPhoneNumber($request->request->get('phoneNumber'));
         $cashOUtRP->setBeingProcessed(true);
         $cashOUtRP->setVerified(false);
+        $cashOUtRP->setCashoutSuccessed(false);
+        $cashOUtRP->setCashoutFailed(false);
         $cashOUtRP->setCashoutAt(new \DateTime());
         
         //methode hi enregistrena azy amn ni base
@@ -172,5 +173,136 @@ class RPController extends AbstractController
             //$cashOUtRP[$key][''] = $cashOUt->get();
         }
         return $this->json($cashOUtRP);
+    }
+
+    //get recent
+    #[Route('/api/getrecentsuccessedrpcashoutbyuser', name: 'app_get_recent_r_p_user', methods: 'GET')]
+    public function getRecentRpCashOutByUser(Request $request): JsonResponse
+    {
+        $user=$this->getUser();
+        $user = $this->userRepository->findOneById($user->getId());
+
+        $_cashOutRP=$this->cashOutRPRepository->findRecentCashOutByUser($user->getId());
+        
+        $cashOUtRP= array();
+        foreach ($_cashOutRP as $key => $cashOUt) {
+            $cashOUtRP[$key]['transactionType'] = 'cashOut';
+            $cashOUtRP[$key]['RP'] = $cashOUt->getRP();
+            $cashOUtRP[$key]['RPRate'] = $cashOUt->getRPRate();
+            $cashOUtRP[$key]['MGAValue'] = $cashOUt->getMGAValue();
+            $cashOUtRP[$key]['phoneNumber'] = $cashOUt->getPhoneNumber();
+            $cashOUtRP[$key]['name'] = $cashOUt->getName();
+            $cashOUtRP[$key]['beingProcessed'] = $cashOUt->isBeingProcessed();
+            $cashOUtRP[$key]['verified'] = $cashOUt->isVerified();
+            $cashOUtRP[$key]['cashoutSuccessed'] = $cashOUt->isCashoutSuccessed();
+            $cashOUtRP[$key]['cashoutFailed'] = $cashOUt->isCashoutFailed();
+            $cashOUtRP[$key]['date'] = $cashOUt->getCashoutAt();
+            //$cashOUtRP[$key][''] = $cashOUt->get();
+        }
+        return $this->json($cashOUtRP);
+    }
+
+    //admin
+    #[Route('/getpendingrpcashoutbyuser', name: 'app_get_pending_r_p_user', methods: 'GET')]
+    public function getAllPendingRpCashOut(): JsonResponse
+    {
+        $_cashOutRP=$this->cashOutRPRepository->findAllPendingCashOut();
+        $cashOUtRP= array();
+        foreach ($_cashOutRP as $key => $cashOUt) {
+            $cashOUtRP[$key]['id'] = $cashOUt->getId();
+            $cashOUtRP[$key]['mvxId'] = $cashOUt->getUsers()->getAffiliated()->getMvxId();
+            $cashOUtRP[$key]['username'] = $cashOUt->getUsers()->getUsername();
+            $cashOUtRP[$key]['RP'] = $cashOUt->getRP();
+            $cashOUtRP[$key]['RPRate'] = $cashOUt->getRPRate();
+            $cashOUtRP[$key]['MGAValue'] = $cashOUt->getMGAValue();
+            $cashOUtRP[$key]['phoneNumber'] = $cashOUt->getPhoneNumber();
+            $cashOUtRP[$key]['name'] = $cashOUt->getName();
+            $cashOUtRP[$key]['beingProcessed'] = $cashOUt->isBeingProcessed();
+            $cashOUtRP[$key]['verified'] = $cashOUt->isVerified();
+            $cashOUtRP[$key]['cashoutSuccessed'] = $cashOUt->isCashoutSuccessed();
+            $cashOUtRP[$key]['cashoutFailed'] = $cashOUt->isCashoutFailed();
+            $cashOUtRP[$key]['date'] = $cashOUt->getCashoutAt();
+            //$cashOUtRP[$key][''] = $cashOUt->get();
+        }
+        return $this->json($cashOUtRP);
+    }
+    //admin
+    #[Route('/setrpcashoutverified/{id}', name: 'app_set_rp_cashout_verified', methods: 'POST')]
+    public function setRpCashOutVerified($id): JsonResponse
+    {
+        $cashout=$this->cashOutRPRepository->findOneByid($id);
+
+        $cashout->setVerified(true);
+
+        //methode hi enregistrena azy amn ni base
+        $this->em->getConnection()->beginTransaction();
+        try {
+
+            $this->em->persist($cashout);
+
+            $this->em->flush();
+            $this->em->commit();
+        } catch (\Exception $e) {
+            $this->em->rollback();
+            throw $e;
+        }
+
+
+        return $this->json('ok');
+    }
+
+    //admin
+    #[Route('/setrpcashoutsucceed/{id}', name: 'app_set_rp_cashout_successed', methods: 'POST')]
+    public function setRpCashOutSucceed($id): JsonResponse
+    {
+        $cashout=$this->cashOutRPRepository->findOneByid($id);
+        $user=$cashout->getUsers();
+
+        
+        //new CurrentRP for User
+        $user->setCurrentRP($user->getCurrentRP()-$cashout->getRP());
+
+        $cashout->setCashoutSuccessed(true);
+
+        //methode hi enregistrena azy amn ni base
+        $this->em->getConnection()->beginTransaction();
+        try {
+
+            $this->em->persist($cashout);
+            $this->em->persist($user);
+
+            $this->em->flush();
+            $this->em->commit();
+        } catch (\Exception $e) {
+            $this->em->rollback();
+            throw $e;
+        }
+
+
+        return $this->json('ok');
+    }
+
+    //admin
+    #[Route('/setrpcashoutfailed/{id}', name: 'app_set_rp_cashout_failed', methods: 'POST')]
+    public function setRpCashOutFailed($id): JsonResponse
+    {
+        $cashout=$this->cashOutRPRepository->findOneByid($id);
+       
+        $cashout->setCashoutFailed(true);
+        //methode hi enregistrena azy amn ni base
+        $this->em->getConnection()->beginTransaction();
+        try {
+
+            $this->em->persist($cashout);
+
+            $this->em->flush();
+            $this->em->commit();
+        } catch (\Exception $e) {
+            $this->em->rollback();
+            throw $e;
+        }
+
+
+        return $this->json('ok');
     }
 }

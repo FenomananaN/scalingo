@@ -79,6 +79,23 @@ class TransactionRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
+
+    public function findRecentSuccessedTransactionByUser(int $user)
+    {
+        $qb = $this->createQueryBuilder('t');
+        $qb
+            ->andWhere('t.users = :user')
+            ->where(
+                $qb->expr()->andX(
+                    $qb->expr()->eq('t.verified', 'true'),
+                    $qb->expr()->eq('t.users',':user'),
+                ))
+            ->setParameter('user', $user)
+            ->orderBy('t.transactionAt', 'DESC')
+            ->setMaxResults(3);
+
+        return $qb->getQuery()->getResult();
+    }
     
 
 

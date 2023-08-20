@@ -21,6 +21,35 @@ class CashOutRPRepository extends ServiceEntityRepository
         parent::__construct($registry, CashOutRP::class);
     }
 
+    public function findRecentCashOutByUser(int $user)
+    {
+        $qb = $this->createQueryBuilder('c');
+        $qb
+            ->where(
+                $qb->expr()->andX(
+                    $qb->expr()->eq('c.users', ':user'),
+                    $qb->expr()->eq('c.cashoutSuccessed','true'),
+                ))
+            ->setParameter('user', $user)
+            ->orderBy('c.cashoutAt', 'DESC')
+            ->setMaxResults(3);
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findAllPendingCashOut(){
+        $qb = $this->createQueryBuilder('c');
+        $qb
+            ->where(
+                $qb->expr()->andX(
+                    $qb->expr()->eq('c.cashoutSuccessed', 'false'),
+                    $qb->expr()->eq('c.cashoutFailed','false'),
+                ))
+            ->orderBy('c.cashoutAt', 'DESC')
+            ;
+        return $qb->getQuery()->getResult();
+    }
+
 //    /**
 //     * @return CashOutRP[] Returns an array of CashOutRP objects
 //     */

@@ -51,7 +51,6 @@ class TransactionController extends AbstractController
             $user = $this->userRepository->findOneById($user->getId());
         }
 
-
         //look if the user is already verified
         if(!$user->isVerifiedStatus()){
             return $this->json(['message'=>"Votre compte n'est pas verifier"],401);
@@ -77,15 +76,9 @@ class TransactionController extends AbstractController
         $depot->setBeingProcessed(false);
         $depot->setTransactionDone(false);
         $depot->setVerified(false);
+        $depot->setRPObtenue('0');
 
-        //add RP
-        $rp=$this->rPUtils->RPO($depot->getSoldeAriary());
-        $depot->setRPObtenue($rp);
-
-        //new CurrentRP
-        $user->setCurrentRP($user->getCurrentRP()+$rp);
-        
-
+     
         //creating the generated parrainageId
         $_referenceManavola = $this->transactionRepository->findAllReferenceManavola();
         $referenceManavola = array();
@@ -101,7 +94,6 @@ class TransactionController extends AbstractController
         $this->em->getConnection()->beginTransaction();
         try {
             $this->em->persist($depot);
-            $this->em->persist($user);
             $this->em->flush();
             $this->em->commit();
         } catch (\Exception $e) {
@@ -200,13 +192,8 @@ class TransactionController extends AbstractController
         $retrait->setBeingProcessed(false);
         $retrait->setTransactionDone(false);
         $retrait->setAccountNumber('none');
-        ////add RP
-        $rp=$this->rPUtils->RPO($retrait->getSoldeAriary());
-        $retrait->setRPObtenue($rp);
-
-        //new CurrentRP
-        $user->setCurrentRP($user->getCurrentRP()+$rp);
-
+        $retrait->setRPObtenue('0');
+     
         //creating the generated parrainageId
         $_referenceManavola = $this->transactionRepository->findAllReferenceManavola();
         $referenceManavola = array();
@@ -219,7 +206,7 @@ class TransactionController extends AbstractController
         $this->em->getConnection()->beginTransaction();
         try {
             $this->em->persist($retrait);
-            $this->em->persist($user);
+        
             $this->em->flush();
             $this->em->commit();
         } catch (\Exception $e) {
@@ -321,6 +308,53 @@ class TransactionController extends AbstractController
         }
         return $this->json($transaction);
     }
+
+    //user
+    #[Route('/api/getRecentSuccessedTransaction', name: 'app_get_recent_successed_transaction', methods:'GET')]
+    public function getRecentSuccessedTransaction(): JsonResponse
+    {
+        //efa mis id
+
+        $_transaction=$this->transactionRepository->findRecentSuccessedTransactionByUser($this->getUser()->getId());
+        
+       // dd($_transaction);
+        $transaction= array();
+        foreach ($_transaction as $key => $transac) {
+            $transaction[$key]['id'] = $transac->getId();
+            $transaction[$key]['transactionType'] = $transac->getTransactionType();
+            $transaction[$key]['solde'] = $transac->getSolde();
+            $transaction[$key]['AccountNumber'] = $transac->getAccountNumber();
+            $transaction[$key]['soldeAriary'] = $transac->getSoldeAriary();
+            $transaction[$key]['cours'] = $transac->getCours();
+            $transaction[$key]['mainWallet'] = $transac->getGlobalWallet()->getMainWallet()->getMainWalletName();
+            $transaction[$key]['mainWalletLogo'] = $transac->getGlobalWallet()->getMainWallet()->getLogo();
+            $transaction[$key]['wallet'] = $transac->getGlobalWallet()->getWallet()->getWalletName();
+            $transaction[$key]['currency'] = $transac->getGlobalWallet()->getWallet()->getCurrency();
+            $transaction[$key]['walletLogoMain'] = $transac->getGlobalWallet()->getWallet()->getLogoMain();
+            $transaction[$key]['walletLogo'] = $transac->getGlobalWallet()->getWallet()->getLogo();
+            if(!$transac->getGasyWallet()){
+                $transaction[$key]['gasyWallet'] = 'null';
+                $transaction[$key]['gasyWalletLogo'] = 'null';
+                $transaction[$key]['gasyWalletLogoMain'] = 'null';
+            } else {
+                $transaction[$key]['gasyWallet'] = $transac->getGasyWallet()->getGasyWalletName();
+                $transaction[$key]['gasyWalletLogo'] = $transac->getGasyWallet()->getLogo();
+                $transaction[$key]['gasyWalletLogoMain'] = $transac->getGasyWallet()->getLogoMain();
+            }
+            $transaction[$key]['date'] = $transac->getTransactionAt();
+            $transaction[$key]['referenceManavola'] = $transac->getReferenceManavola();
+            $transaction[$key]['transactionId'] = $transac->getTransactionId();
+            $transaction[$key]['beingProcessed'] = $transac->isBeingProcessed();
+            $transaction[$key]['verified'] = $transac->isVerified();
+            $transaction[$key]['transactionDone'] = $transac->isTransactionDone();
+            $transaction[$key]['failed'] = $transac->isFailed();
+            $transaction[$key]['rp'] = $transac->getRPObtenue();
+
+            //soldeAriary cours globalWallet gasyWallet date referenceManavola transactionId //policyAgreement transactionDone verified beingProcessed
+        }
+        return $this->json($transaction);
+    }
+
 
     //user
     #[Route('/api/getAllTransaction', name: 'app_get_all_transaction', methods:'GET')]
@@ -669,10 +703,21 @@ class TransactionController extends AbstractController
         $transac->setVerified(true);
         $transac->setBeingProcessed(true);
         $transac->setTransactionDone(true);
+
+           //add RP
+        $rp=$this->rPUtils->RPO($transac->getSoldeAriary());
+        $transac->setRPObtenue($rp);
+   
+           //new CurrentRP
+        $user=$transac->getUsers();
+        $user->setCurrentRP($user->getCurrentRP()+$rp);
+           
+   
         
         $this->em->getConnection()->beginTransaction();
         try {
             $this->em->persist($transac);
+            $this->em->persist($user);
             $this->em->flush();
             $this->em->commit();
         } catch (\Exception $e) {
