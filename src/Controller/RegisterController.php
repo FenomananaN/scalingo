@@ -141,7 +141,8 @@ class RegisterController extends AbstractController
         $rp=$this->rpManagerRepository->findOneById(1);
         $user->setCurrentRP($rp->getRPInitial());
         //
-        //
+        //set initial commision
+        $user->setCurrentComission(0);
 
         //creating parrainage for user
         //  $user=$this->userRepository->findOneByEmail('fenomanana.nomenjanahary@gmail.com');
@@ -169,6 +170,7 @@ class RegisterController extends AbstractController
             $affiliatedLevel = new AffiliatedLevel();
             $affiliatedLevel->setAffiliated($affiliater);
             $affiliatedLevel->setUsers($user);
+            $affiliatedLevel->setMiniCommission(0);
         }
        // dump($affiliatedLevel);
        // dd($user);

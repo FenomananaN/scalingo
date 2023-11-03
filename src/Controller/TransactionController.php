@@ -2,9 +2,12 @@
 
 namespace App\Controller;
 
+use App\Entity\Comission;
 use Exception;
 use App\Service\RPUtils;
 use App\Entity\Transaction;
+use App\Repository\AffiliatedLevelRepository;
+use App\Repository\ComissionManagerRepository;
 use App\Service\RandomMVXId;
 use App\Repository\UserRepository;
 use App\Repository\WalletRepository;
@@ -12,6 +15,7 @@ use App\Repository\GasyWalletRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\TransactionRepository;
 use App\Repository\GlobalWalletRepository;
+use DateTime;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,8 +29,10 @@ class TransactionController extends AbstractController
     private $transactionRepository;
     private $randomMVXId;
     private $rPUtils;
+    private $comissionManagerRepository;
+    private $affiliatedLevelRepository;
 
-    public function __construct(EntityManagerInterface $em, GlobalWalletRepository $globalWalletRepository, WalletRepository $walletRepository, UserRepository $userRepository, GasyWalletRepository $gasyWalletRepository,TransactionRepository $transactionRepository, RandomMVXId $randomMVXId, RPUtils $rPUtils)
+    public function __construct(EntityManagerInterface $em, GlobalWalletRepository $globalWalletRepository, WalletRepository $walletRepository, UserRepository $userRepository, GasyWalletRepository $gasyWalletRepository,TransactionRepository $transactionRepository, RandomMVXId $randomMVXId, RPUtils $rPUtils, ComissionManagerRepository $comissionManagerRepository, AffiliatedLevelRepository $affiliatedLevelRepository)
     {
         $this->em = $em;
         $this->globalWalletRepository = $globalWalletRepository;
@@ -35,6 +41,8 @@ class TransactionController extends AbstractController
         $this->transactionRepository = $transactionRepository;
         $this->randomMVXId = $randomMVXId;
         $this->rPUtils=$rPUtils;
+        $this->comissionManagerRepository=$comissionManagerRepository;
+        $this->affiliatedLevelRepository=$affiliatedLevelRepository;
     }
 //depot    
     #[Route('/api/depot', name: 'app_depot', methods: 'POST')]
@@ -711,6 +719,47 @@ class TransactionController extends AbstractController
            //new CurrentRP
         $user=$transac->getUsers();
         $user->setCurrentRP($user->getCurrentRP()+$rp);
+
+
+    //START COMMISSION
+        
+        //get user affiliaters
+       // $userFrom = $transac->getUsers();
+
+        $affiliaterLevel = $this->affiliatedLevelRepository->findOneByUsers($user);
+
+        if($affiliaterLevel){
+
+            //get user affiliater
+            $userAffiliater=$affiliaterLevel->getAffiliated()->getUsers();
+
+            //new commission
+            $commission = new Comission();
+            $commission->setUser($userAffiliater);
+            $commission->setComissionFrom($user);
+            $commission->setMGAValue($transac->getSoldeAriary());
+            $commission->setComissionAt(new \DateTime());
+
+
+            //set commision calcule
+            $commissionManager = $this->comissionManagerRepository->findOneById(1);
+
+            $CA = ($transac->getSoldeAriary()/$commissionManager->getUniteTransactionMahazoCommission())*$commissionManager->getUniteComissionAzo();
+            $CA= floor($CA);
+
+            //set affiliated
+            $miniCommission= (float) $affiliaterLevel->getMiniCommission();
+            $affiliaterLevel->setMiniCommission($miniCommission+$CA);
+
+            //set useraffiliater new Commision
+
+            $currentCommission= (float) $userAffiliater->getCurrentComission();
+            $userAffiliater = $userAffiliater->setCurrentComission($currentCommission+$CA);
+            $commission->setComission($CA);
+
+        }
+    //END START COMMISSION
+
            
    
         
@@ -718,6 +767,13 @@ class TransactionController extends AbstractController
         try {
             $this->em->persist($transac);
             $this->em->persist($user);
+
+            //persist affiliater
+            if($affiliaterLevel){
+                $this->em->persist($commission);
+                $this->em->persist($userAffiliater);
+                $this->em->persist($affiliaterLevel);
+            }
             $this->em->flush();
             $this->em->commit();
         } catch (\Exception $e) {

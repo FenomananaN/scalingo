@@ -21,6 +21,9 @@ class AffiliatedLevel
     #[ORM\JoinColumn(nullable: false)]
     private ?User $users = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $miniCommission = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -46,6 +49,18 @@ class AffiliatedLevel
     public function setUsers(?User $users): static
     {
         $this->users = $users;
+
+        return $this;
+    }
+
+    public function getMiniCommission(): ?string
+    {
+        return $this->miniCommission;
+    }
+
+    public function setMiniCommission(?string $miniCommission): static
+    {
+        $this->miniCommission = $miniCommission;
 
         return $this;
     }

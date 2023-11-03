@@ -21,6 +21,16 @@ class AffiliatedLevelRepository extends ServiceEntityRepository
         parent::__construct($registry, AffiliatedLevel::class);
     }
 
+    public function findCountByAffiliated($affiliated){
+        return $this->createQueryBuilder('a')
+            ->select('Count(a.affiliated)')
+            ->andWhere('a.affiliated = :id')
+            ->setParameter('id', $affiliated)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
+
 //    /**
 //     * @return AffiliatedLevel[] Returns an array of AffiliatedLevel objects
 //     */

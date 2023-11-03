@@ -77,12 +77,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[ORM\Column(type: Types::ARRAY)]
     private array $roles = [];
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Comission::class)]
+    private Collection $comissions;
+
+    #[ORM\Column(length: 255)]
+    private ?string $currentComission = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: ComissionCashOut::class)]
+    private Collection $comissionCashOuts;
+
     public function __construct()
     {
         $this->affiliatedLevels = new ArrayCollection();
         $this->oldPhoneNumbers = new ArrayCollection();
         $this->transactions = new ArrayCollection();
         $this->cashOutRPs = new ArrayCollection();
+        $this->comissions = new ArrayCollection();
+        $this->comissionCashOuts = new ArrayCollection();
     }
     
     public function getId(): ?int
@@ -446,5 +457,77 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
        // dd($id,$payload);
         //mis blem lasa email roa
         return (new User())->setId($id)->setUsername($payload['username'])->setRoles($payload['roles']);
+    }
+
+    /**
+     * @return Collection<int, Comission>
+     */
+    public function getComissions(): Collection
+    {
+        return $this->comissions;
+    }
+
+    public function addComission(Comission $comission): static
+    {
+        if (!$this->comissions->contains($comission)) {
+            $this->comissions->add($comission);
+            $comission->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComission(Comission $comission): static
+    {
+        if ($this->comissions->removeElement($comission)) {
+            // set the owning side to null (unless already changed)
+            if ($comission->getUser() === $this) {
+                $comission->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCurrentComission(): ?string
+    {
+        return $this->currentComission;
+    }
+
+    public function setCurrentComission(string $currentComission): static
+    {
+        $this->currentComission = $currentComission;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ComissionCashOut>
+     */
+    public function getComissionCashOuts(): Collection
+    {
+        return $this->comissionCashOuts;
+    }
+
+    public function addComissionCashOut(ComissionCashOut $comissionCashOut): static
+    {
+        if (!$this->comissionCashOuts->contains($comissionCashOut)) {
+            $this->comissionCashOuts->add($comissionCashOut);
+            $comissionCashOut->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComissionCashOut(ComissionCashOut $comissionCashOut): static
+    {
+        if ($this->comissionCashOuts->removeElement($comissionCashOut)) {
+            // set the owning side to null (unless already changed)
+            if ($comissionCashOut->getUser() === $this) {
+                $comissionCashOut->setUser(null);
+            }
+        }
+
+        return $this;
     }
 }

@@ -92,6 +92,10 @@ class UserController extends AbstractController
 
         $affiliated=$this->affiliatedRepository->findOneByUsers($user);
 
+        $count= $this->affiliatedLevelRepository->findCountByAffiliated($affiliated->getId());
+
+        //nbr referal tokon atao
+
         return $this->json([
             'id' => $user->getId(),
             'email' => $user->getEmail(),
@@ -102,6 +106,8 @@ class UserController extends AbstractController
             'airtel' => $user->getAirtel(),
             'createdAt' => $user->getCreatedAt(), 
             'currentRP' => $user->getCurrentRP(),
+            'currentComission'=>$user->getCurrentComission(),
+            'nbrRefferal'=>$count[1],
             'isVerified' => $user->isVerifiedStatus(),
             'isVerificationPending'=>$user->isVerificationPending(),
             'mvxId' => $affiliated->getMvxId(),
@@ -253,7 +259,9 @@ class UserController extends AbstractController
         foreach($_commission as $key => $com){
             $commission[$key]['manavolaId']=$com->getUsers()->getAffiliated()->getMvxId();
             $commission[$key]['username']=$com->getUsers()->getUsername();
+            $commission[$key]['commission'] = $com->getMiniCommission();
         }
+        
         return $this->json($commission);
     }
 
